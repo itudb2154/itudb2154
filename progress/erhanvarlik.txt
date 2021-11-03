@@ -1,1 +1,2 @@
 repo is created
+ignore is updated
