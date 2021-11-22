@@ -1,2 +1,4 @@
 repo is created
 ignore is updated
+login - signup operations are handled
+some session mechanism are added but better implementation will be done
