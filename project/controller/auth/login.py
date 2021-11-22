@@ -1,5 +1,5 @@
 from project import app
-from flask import render_template, redirect, url_for
+from flask import render_template, redirect, url_for, session
 from flask_bootstrap import Bootstrap
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField
@@ -15,11 +15,10 @@ connection = psycopg2.connect("postgres://pylafsgesfibkp:008aa6f8817e256b98e0344
 cursor = connection.cursor()
 #db connection complete
 
-
 bootstrap = Bootstrap(app)
 
 class LoginForm(FlaskForm):
-    username = StringField('username', validators=[InputRequired(), Length(min=4, max=15)])
+    username = StringField('username', validators=[InputRequired(), Length(min=4, max=50)])
     password = PasswordField('password', validators=[InputRequired(), Length(min=8, max=80)])
     remember = BooleanField('remember me')
 
@@ -32,7 +31,7 @@ class RegisterForm(FlaskForm):
 @app.route('/login', methods = ['GET', 'POST'])
 def login():
     form = LoginForm()
-
+    error = False
     if form.validate_on_submit():
         #it returns the data
 
@@ -46,32 +45,21 @@ def login():
         hash = d.hexdigest()
         #crpytion complete
 
-
         #db selection test
-        cursor.execute('''SELECT id FROM "user" where name='%s' and password='%s';''' % (form.username.data, hash))
+        cursor.execute('''SELECT id FROM "user" where mail='%s' and password='%s';''' % (form.username.data, hash))
         response = cursor.fetchone()
-
+ 
         if response == None:
-            print("password or username is incorrect")
-            return '<h1>' + 'password or username is incorrect' + '</h1>' 
+            error = True;
         else:
-            print("successfull")
-            return '<h1>' + 'successfull' + '</h1>' 
+            session["id"] = response;
+            return redirect("/index")
 
-
-        #for i in userData:
-            #if form.username.data in userData:
-                #if form.password.data :
-        #db selection test complete
-
-        return '<h1>' + form.username.data + ' ' + form.password.data + '</h1>' 
-
-    return render_template('login.html', form=form)
+    return render_template('login.html', form=form, error=error)
 
 @app.route('/register', methods = ['GET', 'POST'])
 def register():
     form = RegisterForm()
-
     if form.validate_on_submit():
         #crpytion
         import hashlib
@@ -83,16 +71,19 @@ def register():
         hash = d.hexdigest()
         #crpytion complete
 
+        cursor.execute('''SELECT id FROM "user" where mail='%s';''' % (form.email.data))
+        response = cursor.fetchone()
+        if response != None:
+            return render_template('register.html', form=form, error=True)
         #db insertion test
         cursor.execute('''INSERT INTO "user" (name, password, mail, country_id) VALUES ('%s', '%s', '%s', (select id from country where name='adminLand')) ON CONFLICT DO NOTHING;''' % (form.username.data, hash, form.email.data))
+        
         connection.commit()
 
         cursor.execute('''SELECT * FROM "user";''')
         print(cursor.fetchall())
-        #db insertion test complete
-
-        #return some succesfull page 
-        return '<h1>' + form.username.data + ' ' + form.email.data + form.password.data + '</h1>' 
+        success = True
+        return render_template('register.html', form=form, success=True),  {"Refresh": "2; url=/login"}
 
     return render_template('register.html', form=form)
 
@@ -104,11 +95,26 @@ def index():
     connection.commit()
     recipes = cursor.fetchall()
 
-    
-
-    #for recipe in recipes:
-        #recipe[1] = str(recipe[1])
-
     print(recipes[0][1])
+    if not session.get("id"):
+        return render_template('index.html', recipes=recipes, user=False)
 
-    return render_template('index.html', recipes=recipes)
+    return render_template('index.html', recipes=recipes, user=True)
+
+@app.route('/menus', methods = ['GET', 'POST'])
+def menus():
+    if session.get("id"):
+        cursor.execute('''SELECT name FROM "user" where id='%s';''' % (session.get("id")))
+        connection.commit()
+        name = cursor.fetchone()
+        return render_template('menus.html', name=name[0], user=True)
+    
+    return redirect("/index")
+
+    
+@app.route('/logout', methods = ['GET', 'POST'])
+def logout():
+    if session.get("id"):
+        session["id"] = None
+        
+    return redirect("/index")

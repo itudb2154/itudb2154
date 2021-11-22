@@ -1,38 +1,90 @@
-{% extends "base.html" %}
 {% import "bootstrap/wtf.html" as wtf %}
-{% block content %}
 
-<div class="my-body">
-    <div class="form-signin">
-        <form method="POST" action="/login">
+<!doctype html>
+<html lang="en">
+  <head>
+  	<title>Login 07</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+   <link rel="stylesheet" href="static/css/style.css">
+	<link href="https://fonts.googleapis.com/css?family=Lato:300,400,700,900&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+	
 
-            <i class='fa fa-pizza-slice fa-5x link-light'></i><br/>
+	</head>
+	<body>
+      <header class="p-3 bg-dark text-white">
+         <div class="container">
+           <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
+				<!--<a href="/" class="d-flex align-items-center mb-2 mb-lg-0 text-white text-decoration-none">
+					<svg class="bi me-2" width="40" height="32" role="img" aria-label="Bootstrap"><use xlink:href="#bootstrap"></use></svg>
+				</a>
+		
+				<ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
+					<li><a href="#" class="nav-link px-2 text-white">Recipes</a></li>
+					{%if user%}
+					<li><a href="/user/menus" class="nav-link px-2 text-white">My Menus</a></li>
+					{%endif%}
+				</ul>
+				<div class="text-end">
+					<a href="/login" class="btn btn-outline-light me-2">Login</a>
+					<a href="/register" class="btn btn-warning">Sign-up</a>
+				</div>
+				-->
+		
+				<form class="col-12 col-lg-auto mb-3 mb-lg-0 me-lg-3">
+					<input type="search" class="form-control form-control-dark" placeholder="Search..." aria-label="Search">
+				</form>
+           </div>
+         </div>
+       </header>
+	<section class="ftco-section">
+		<div class="container">
+			<div class="row justify-content-center">
+				<div class="col-md-12 col-lg-10">
+						<div class="login-wrap p-4 p-lg-5">
+			      	<div class="d-flex">
+			      		<div class="w-100">
+			      			<h3 class="mb-4">Sign In</h3>
+                        
+			      		</div>
+			      	</div>
+							<form action="/login" method="POST" class="signin-form">
+			      		<div class="form-group mb-3">
+                        {{ form.hidden_tag() }}
+                        {{ wtf.form_field(form.username)}}
+			      		</div>
+		            <div class="form-group mb-3">
+                     {{ wtf.form_field(form.password)}}
+		            </div>
+                  {%if error%}
+                  <div class="form-group">
+		            	<label class="alert alert-danger" style="padding:7px; width:100%; text-align:center; margin-top:15px;">Incorrect username or password!</label> 
+		            </div>
+                  {%endif%}
+		            <div class="form-group">
+		            	<button type="submit" class="form-control btn btn-primary submit px-3">Sign In</button>
+		            </div>
+		            <div class="form-group d-md-flex">
+		            	<!--<div class="w-50 text-left">
+			            	<label class="checkbox-wrap checkbox-primary mb-0">Remember Me
+									  <input type="checkbox" checked>
+									  <span class="checkmark"></span>
+								</label>
+							</div>-->
+		            </div>
+		          </form>
+		        </div>
+		      </div>
+				</div>
+			</div>
+		</div>
+	</section>
 
-        <h1 class="h3 mt-3 mb-3 fw-normal link-light">Please sign in</h1>
-    
-        <div class="form-floating text-white">
-            {{ form.hidden_tag() }}
-            {{ wtf.form_field(form.username) }}
+   <script src="static/js/jquery.min.js"></script>
+   <script src="static/js/popper.js"></script>
+   <script src="static/js/bootstrap.min.js"></script>
+   <script src="static/js/main.js"></script>
 
-        </div>
-        <div class="form-floating text-white">
-            {{ wtf.form_field(form.password) }}
-        </div>
-    
-        <div class="checkbox mb-3 text-white">
-            {{ wtf.form_field(form.remember) }}
-        </div>
-
-        <div class="checkbox mb-3 text-white">
-          <p>Daha önce hesap oluşturmadınız mı? Lütfen <a href="login.html">buradan </a>kayıt olun.
-          </p>
-        </div>
-
-        <button class="w-50 btn btn-lg btn-primary" type="submit">Sign in</button>
-        <p class="mt-5 mb-3 text-muted">© 2017–2021</p>
-        </form>
-    </div>
-
-</div>
-
-{% endblock %}
+	</body>
+</html>
