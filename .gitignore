@@ -1,3 +1,5 @@
 progress/*.txt
 venv
 venv/*
+flask_session
+flask_session/*

@@ -19,7 +19,7 @@
             </a>
     
             <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
-              <li><a href="#" class="nav-link px-2 text-white">Recipes</a></li>
+              <li><a href="/" class="nav-link px-2 text-white">Recipes</a></li>
               {%if user%}
               <li><a href="/menus" class="nav-link px-2 text-white">My Menus</a></li>
               {%endif%}
@@ -45,13 +45,13 @@
 
       <div class="album py-5 bg-light">
         <div class="container">
-          <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
+          <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-4">
 
             {%if recipes%}
-            {%for recipe in recipes%}
+            {%for key, recipe in recipes%}
             <div class="col">
                 <div class="card shadow-sm">
-                  <img class="bd-placeholder-img card-img-top" src="{{ recipe[0] }}" width="100%" height="225">
+                  <img class="bd-placeholder-img card-img-top" src="{{ recipe.photo_url }}" width="100%" height="225">
 
                   <div class="card-body">
                     <p class="card-text"> loreme ipsum asdadsasd </p>
