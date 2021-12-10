@@ -14,10 +14,10 @@ TABLE_CREATE_QUERY = [
 
         '''CREATE TABLE IF NOT EXISTS "meal" (
             "id" SERIAL PRIMARY KEY,
-            "name" VARCHAR(50),
+            "name" VARCHAR(80),
             "category_id" int,
             "photo_url" VARCHAR,
-            "coisine_name" VARCHAR(50),
+            "coisine_name" VARCHAR(80),
             "country_id" INTEGER NOT NULL
             )''',
  
@@ -65,7 +65,7 @@ TABLE_CREATE_QUERY = [
         '''CREATE TABLE IF NOT EXISTS "ingredients_of_meal" (
             "recipe_id" INTEGER NOT NULL,
             "ingredient_id" INTEGER NOT NULL,
-            "measurement_quantity" VARCHAR(30)
+            "measurement_quantity" VARCHAR(60)
             )''',
 
         '''CREATE TABLE IF NOT EXISTS"userMenu" (
@@ -134,10 +134,6 @@ for statement in TABLE_CREATE_QUERY:
     cursor.execute(statement)
 
 
-response = requests.get("https://www.themealdb.com/api/json/v1/1/search.php?f=a")
-data = response.json()
-
-
 connection.commit()
 
 #inserting admin's country
@@ -148,53 +144,62 @@ connection.commit()
 cursor.execute('''INSERT INTO "user" (name, country_id) VALUES ('admin', (select id from country where name='adminLand'));''')
 connection.commit()
 
-#for every recipe in meals
-for j in range(len(data["meals"])):
-    #insert its country if it does not exist
-    cursor.execute('''INSERT INTO country (name) VALUES ('%s') ON CONFLICT DO NOTHING;''' % (data["meals"][j]["strArea"]))
-    connection.commit()
+z = 0
+for c in "abc":
+    response = requests.get("https://www.themealdb.com/api/json/v1/1/search.php?f=%s" % (c))
+    data = response.json()
 
-    cursor.execute('''INSERT INTO category (name) VALUES ('%s') ON CONFLICT DO NOTHING;''' % (data["meals"][j]["strCategory"]))
-    connection.commit()
+    #for every recipe in meals
+    for j in range(len(data["meals"])):
+        print(z)
+        #insert its country if it does not exist
+        cursor.execute('''INSERT INTO country (name) VALUES ('%s') ON CONFLICT DO NOTHING;''' % (data["meals"][j]["strArea"]))
+        
 
-    #insert its category if it does not exist
-    cursor.execute('''INSERT INTO meal (name, country_id, category_id, photo_url) VALUES (%s, (select id from country where name=%s), (select id from category where name=%s), %s) ON CONFLICT DO NOTHING;''', (data["meals"][j]["strMeal"], data["meals"][j]["strArea"], data["meals"][j]["strCategory"], data["meals"][j]["strMealThumb"]))
-    connection.commit()
+        cursor.execute('''INSERT INTO category (name) VALUES ('%s') ON CONFLICT DO NOTHING;''' % (data["meals"][j]["strCategory"]))
+        
+
+        #insert its category if it does not exist
+        cursor.execute('''INSERT INTO meal (name, country_id, category_id, photo_url) VALUES (%s, (select id from country where name=%s), (select id from category where name=%s), %s) ON CONFLICT DO NOTHING;''', (data["meals"][j]["strMeal"], data["meals"][j]["strArea"], data["meals"][j]["strCategory"], data["meals"][j]["strMealThumb"]))
+        
 
 
-    #replace single quote with double single quotes (to aviod to errors if the instruction itself has single quotes like don't)
-    new_instruction = data["meals"][j]["strInstructions"].replace("'","''")
+        #replace single quote with double single quotes (to aviod to errors if the instruction itself has single quotes like don't)
+        new_instruction = data["meals"][j]["strInstructions"].replace("'","''")
 
-    #insert its category (assuming all recipes are unique)
-    cursor.execute('''INSERT INTO recipe (name, instruction, user_id, meal_id, drink_alternate, video_url) VALUES ('admins %sth meal', '%s', (select u.id from "user" u where u.name='admin'), (select id from meal where name='%s'), '%s', '%s');''' % (j, new_instruction, data["meals"][j]["strMeal"], data["meals"][j]["strDrinkAlternate"], data["meals"][j]["strYoutube"]))
-    connection.commit()
+        #insert its category (assuming all recipes are unique)
+        cursor.execute('''INSERT INTO recipe (name, instruction, user_id, meal_id, drink_alternate, video_url) VALUES ('admins %sth meal', '%s', (select u.id from "user" u where u.name='admin'), (select id from meal where name='%s'), '%s', '%s');''' % (z, new_instruction, data["meals"][j]["strMeal"], data["meals"][j]["strDrinkAlternate"], data["meals"][j]["strYoutube"]))
+        z = z + 1
+        
 
-    #there are 20 ingredients at max
-    for i in range(20):
-        #append the number to the strIngredient
-        ingredient = "strIngredient" + str(i+1)
-
-        #if the api sends a meaningfull ingredient
-        if data["meals"][j][ingredient] != '' and data["meals"][j][ingredient] is not None:
-            #add it if it does not already exist
-            cursor.execute('''INSERT INTO ingredient (name) VALUES ('%s') ON CONFLICT DO NOTHING;'''% (data["meals"][j][ingredient]))
-            connection.commit()
-
-    #there are 20 quantitites at max
-    for i in range(20):
-        #append the number to the strMeasure
-        measure = "strMeasure" + str(i+1)
-
-        #if the api sends a meaningfull quantity
-        if data["meals"][j][measure] != '' and data["meals"][j][measure] is not None and data["meals"][j][measure] != ' ':
-            #we also need the ingredient name to connect them via foreign key
+        #there are 20 ingredients at max
+        for i in range(20):
+            #append the number to the strIngredient
             ingredient = "strIngredient" + str(i+1)
 
-            #ingredient quantities are not unique because in a recipe, we might use 30g butter for both the meal and the sauce
-            #so, recipe, ingredient and quantity combined are not a unique value.
-            #if the butter is 30g and 45g, we can distinguish them by their order ??
-            cursor.execute('''INSERT INTO ingredients_of_meal (recipe_id, ingredient_id, measurement_quantity) VALUES ((select id from recipe where name='admins %sth meal'), (select id from ingredient where name='%s'), '%s');''' % (j, data["meals"][j][ingredient], data["meals"][j][measure]))
-            connection.commit()
+            #if the api sends a meaningfull ingredient
+            if data["meals"][j][ingredient] != '' and data["meals"][j][ingredient] is not None:
+                #add it if it does not already exist
+                cursor.execute('''INSERT INTO ingredient (name) VALUES ('%s') ON CONFLICT DO NOTHING;'''% (data["meals"][j][ingredient]))
+                
+
+        #there are 20 quantitites at max
+        for i in range(20):
+            #append the number to the strMeasure
+            measure = "strMeasure" + str(i+1)
+
+            #if the api sends a meaningfull quantity
+            if data["meals"][j][measure] != '' and data["meals"][j][measure] is not None and data["meals"][j][measure] != ' ':
+                #we also need the ingredient name to connect them via foreign key
+                ingredient = "strIngredient" + str(i+1)
+
+                #ingredient quantities are not unique because in a recipe, we might use 30g butter for both the meal and the sauce
+                #so, recipe, ingredient and quantity combined are not a unique value.
+                #if the butter is 30g and 45g, we can distinguish them by their order ??
+                cursor.execute('''INSERT INTO ingredients_of_meal (recipe_id, ingredient_id, measurement_quantity) VALUES ((select id from recipe where name='admins %sth meal'), (select id from ingredient where name='%s'), '%s');''' % (j, data["meals"][j][ingredient], data["meals"][j][measure]))
+                
+        
+        connection.commit()
 
 
 cursor.execute('''SELECT * FROM country;''')

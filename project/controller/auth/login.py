@@ -1,7 +1,9 @@
 from project import app
 from flask import render_template, redirect, url_for, session, request
 from flask_wtf import FlaskForm
-from project.models.database import Database
+from project.models.database import *
+from project.models.recipe import *
+
 db = Database("postgres://pylafsgesfibkp:008aa6f8817e256b98e034493c344833da4b0447a1d11fb05073ea4ec87447ff@ec2-35-153-88-219.compute-1.amazonaws.com:5432/db0rfao3q1lr16")
 
 app.config['SECRET_KEY'] = 'thisisthesecret'
@@ -106,7 +108,7 @@ def menus():
     cursor.execute('''SELECT name FROM "user" where id='%s';''' % (session.get("id")))
     connection.commit()
     name = cursor.fetchone()
-    return render_template('menus.html', name=name[0], user=True)
+    return render_template('menus.html', name=name, user=True)
 
     
 @app.route('/logout', methods = ['GET', 'POST'])
@@ -115,3 +117,18 @@ def logout():
         session["id"] = None
         
     return redirect("/")
+
+@app.route('/addrecipe', methods = ['GET', 'POST'])
+@login_required
+def addrecipe():
+    if request.method == 'POST':
+        #assuming the recipe is given correctly
+        print(request.form['meal'])
+        recipe = Recipe(max(session["id"]), request.form['name'], request.form['meal'], " ", request.form['instruction'], request.form['portion'], request.form['drink_alternate'], request.form['video_url'])
+        db.add_recipe(recipe)
+
+        return redirect("/")
+
+    meals = db.get_meals()
+
+    return render_template('addrecipe.html', meals=meals)
