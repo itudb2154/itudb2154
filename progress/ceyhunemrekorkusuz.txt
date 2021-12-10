@@ -1,2 +1,3 @@
 the basic mvc structure and some login operations are added to the project.
 classes and login requires are added.
+initDatabase takes more recipes and new methods to db class are added to the project.
