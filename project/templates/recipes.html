@@ -16,9 +16,7 @@
                     <div class="d-flex justify-content-between align-items-center">
                       <div class="btn-group">
                         <button type="button" class="btn btn-sm btn-outline-secondary">View</button>
-                        {%if owner == recipe.user_id %}
                         <button type="button" class="btn btn-sm btn-outline-secondary">Edit</button>
-                        {%endif%}
                       </div>
                       <small class="text-muted">{{recipe.recipe_name}}</small>
                     </div>
@@ -28,6 +26,15 @@
             {%endfor%}
             {%endif%}
 
+        </div>
+        <div class="row row-cols-1 row-cols-sm-4 d-flex justify-content-center">
+            <form action="/recipe/add" method="POST" class="signin-form">
+                <div class="form-group me-2 mt-2">
+                <button type="submit" name="recipeAdd"class="form-control btn btn-dark submit px-3">
+                    Add recipe
+                </button>
+                </div>
+            </form>
         </div>
         </div>
       </div>

@@ -68,12 +68,12 @@ TABLE_CREATE_QUERY = [
             "measurement_quantity" VARCHAR(60)
             )''',
 
-        '''CREATE TABLE IF NOT EXISTS"userMenu" (
+        '''CREATE TABLE IF NOT EXISTS "userMenu" (
             "id" SERIAL PRIMARY KEY,
             "title" VARCHAR(50),
             "description" VARCHAR,
-            "created_date" timestamp,
-            "updated_date" timestamp,
+            "created_date" int,
+            "updated_date" int,
             "notes" VARCHAR,
             "user_id" int
             )''',

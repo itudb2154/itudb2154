@@ -3,6 +3,8 @@ from flask import render_template, redirect, url_for, session, request
 from flask_wtf import FlaskForm
 from project.models.database import *
 from project.models.recipe import *
+import time
+import datetime  
 
 db = Database("postgres://pylafsgesfibkp:008aa6f8817e256b98e034493c344833da4b0447a1d11fb05073ea4ec87447ff@ec2-35-153-88-219.compute-1.amazonaws.com:5432/db0rfao3q1lr16")
 
@@ -35,6 +37,9 @@ def login_required(func):
 
 @app.route('/login', methods = ['GET', 'POST'])
 def login():
+    if session.get("id"):
+        return redirect("/")
+
     error = False
     if request.method == 'POST':
         #it returns the data
@@ -56,13 +61,16 @@ def login():
         if response == None:
             error = True
         else:
-            session["id"] = response
+            session["id"] = response[0]
             return redirect("/")
 
     return render_template('login.html', error=error)
 
 @app.route('/register', methods = ['GET', 'POST'])
 def register():
+    if session.get("id"):
+        return redirect("/")
+
     if request.method == 'POST':
         #crpytion
         import hashlib
@@ -93,22 +101,44 @@ def register():
 
 @app.route('/', methods = ['GET', 'POST'])
 def index():
-
-    recipes = db.get_recipes()
+    owner = -1
+    recipes = db.getRecipes(-1)
     user = False
     if session.get("id"):
         user = True
+        owner = session.get("id")
 
-    return render_template('index.html', recipes=recipes, user=user)
+    return render_template('index.html', recipes=recipes, user=user, owner=owner)
 
 @app.route('/menus', methods = ['GET', 'POST'])
 @login_required
 def menus():
-    #user = User()
-    cursor.execute('''SELECT name FROM "user" where id='%s';''' % (session.get("id")))
-    connection.commit()
-    name = cursor.fetchone()
-    return render_template('menus.html', name=name, user=True)
+    
+    userMenus = db.getUserMenus(session.get("id"))
+    dateNow = int(time.time())
+
+    for key, menu in userMenus:
+        timePast = dateNow - menu.created_date
+
+        days = timePast // 86400
+        hours = timePast // 3600 % 24
+        minutes = timePast // 60 % 60
+        seconds = timePast % 60
+
+        if days:
+           menu.created_date = str(days) + " days ago"
+           continue
+        if hours:
+           menu.created_date = str(hours) + " hours ago"
+           continue
+        if minutes:
+           menu.created_date = str(minutes) + " minutes ago"
+           continue
+        if seconds:
+           menu.created_date = str(seconds) + " seconds ago"
+           continue
+
+    return render_template('menus.html', user=True, userMenus=userMenus)
 
     
 @app.route('/logout', methods = ['GET', 'POST'])
@@ -125,10 +155,47 @@ def addrecipe():
         #assuming the recipe is given correctly
         print(request.form['meal'])
         recipe = Recipe(max(session["id"]), request.form['name'], request.form['meal'], " ", request.form['instruction'], request.form['portion'], request.form['drink_alternate'], request.form['video_url'])
-        db.add_recipe(recipe)
+        recipeId = db.add_recipe(recipe)
+        
+        ingredients = request.form.getlist('ingredient')
+        measures = request.form.getlist('measure')
 
+        db.addRecipeIngredient(ingredients, measures, recipeId)
+        
         return redirect("/")
 
     meals = db.get_meals()
+    ingredients = db.getIngredients()
 
-    return render_template('addrecipe.html', meals=meals)
+    return render_template('addrecipe.html', meals=meals, ingredients=ingredients, user=True)
+
+
+@app.route('/menu/add', methods = ['GET', 'POST'])
+@login_required
+def addMenu():
+    if request.method == 'POST':
+        if request.form['addMenu'] == "insertValue":
+            menuTitle = request.form['title']
+            menuDescription = request.form['description']
+            menuNotes = request.form['notes']
+            userMeals = request.form.getlist('meal')
+            dateNow = int(time.time())
+
+            userMenu = Menu(menuTitle, menuDescription, dateNow, dateNow, menuNotes)
+
+            menuId = db.addUserMenu(userMenu, session.get("id"))
+
+            db.addUserMenuMeals(userMeals, menuId[0])
+
+            return redirect("/menus")
+
+        elif request.form['addMenu'] == "addPage":
+            meals = db.get_meals()
+            return render_template('addmenu.html', meals=meals, user=True)
+
+@app.route('/myrecipes', methods = ['GET', 'POST'])
+@login_required
+def myRecipes():
+    recipes = db.getRecipes(session.get("id"))
+
+    return render_template('recipes.html', recipes=recipes, user=True)
