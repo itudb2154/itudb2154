@@ -1,0 +1,45 @@
+{% extends 'layout.html' %}
+
+{% block head_ext %}
+    <title>Menu</title>
+{% endblock head_ext %}
+
+{% block content %}
+
+        <div class="py-5 bg-light">
+            <div class="container">
+                <div class="justify-content-center">
+                    <img src="{{ meals[0][1].photo_url }}" class="w-25" height="325">
+                    <div class="float-end" style="width:70%">
+                        <h1 class="display-3">{{ menu[1].title }}</h1>
+                        <h3 class="display-6">Description</h3>
+                        
+                        <div class="mt-5">
+                            <p>{{ menu[1].description }}</p>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="text-center">
+                            <h1 class="display-3">Meals</h1>
+                        </div>
+                        <div class="row mt-3">
+                        {%if meals%}
+                        {%for key, meal in meals%}
+                        <div class="card col-sm-3">
+                            <div class="card-body">
+                              <h5 class="card-title">{{ meal.name }}</h5>
+                              <p class="card-text"><b>Category</b> {{ meal.category_name }}</p>
+                              {%if user==owner%}<a href="#" class="btn btn-primary">Edit</a>{%endif%}
+                            </div>
+                        </div>
+                        {%endfor%}
+                        {%endif%}
+                        </div>
+                    </div>
+
+
+                </div>            
+            </div>
+        </div>
+{% endblock %}
+

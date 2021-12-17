@@ -1,4 +1,9 @@
 {% extends 'layout.html' %}
+
+{% block head_ext %}
+    <title>Home</title>
+{% endblock head_ext %}
+
 {% block content %}
 
       <div class="album py-5 bg-light">
@@ -15,10 +20,12 @@
                     <p class="card-text"> {{recipe.meal_name}} </p>
                     <div class="d-flex justify-content-between align-items-center">
                       <div class="btn-group">
-                        <button type="button" class="btn btn-sm btn-outline-secondary">View</button>
-                        {%if owner == recipe.user_id %}
-                        <button type="button" class="btn btn-sm btn-outline-secondary">Edit</button>
-                        {%endif%}
+                        <form action="/recipe" method="POST">
+                          <button type="submit" name="button" value="view" class="btn btn-sm btn-outline-secondary">View</button>
+                          {%if user == recipe.user_id %}
+                          {%if user%}<button type="submit" name="button" value={{key}} class="btn btn-sm btn-outline-secondary">Edit</button>{%endif%}
+                          {%endif%}
+                      </form>
                       </div>
                       <small class="text-muted">{{recipe.recipe_name}}</small>
                     </div>

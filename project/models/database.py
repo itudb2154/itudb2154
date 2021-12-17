@@ -12,8 +12,8 @@ class Database:
     def add_recipe(self, recipe):
         with psycopg2.connect(self.conn, sslmode='require') as connection:
             cursor = connection.cursor()
-            query = '''insert into recipe (user_id, meal_id, name, instruction, portion, drink_alternate, video_url) values (%s, (select id from meal where (name='%s') ), '%s', '%s', '%s', '%s', '%s');''' % (recipe.user_id, recipe.meal_name, recipe.recipe_name, recipe.instruction, recipe.portion, recipe.drink_alternate, recipe.video_url)
-            cursor.execute(query)
+            query = '''insert into recipe (user_id, meal_id, name, instruction, portion, drink_alternate, video_url) values (%s, (select id from meal where (name=%s) ), %s, %s, %s, %s, %s);'''
+            cursor.execute(query, (recipe.user_id, recipe.meal_name, recipe.recipe_name, recipe.instruction, recipe.portion, recipe.drink_alternate, recipe.video_url))
             connection.commit()
 
             query = 'SELECT id FROM recipe order by id desc;'
@@ -31,8 +31,8 @@ class Database:
             if (userId == -1):
                 query = 'select recipe.id, user_id, recipe.name, meal.name, photo_url, instruction, portion, drink_alternate, video_url from meal JOIN recipe ON (meal.id=recipe.meal_id);'
             else:
-                query = '''select recipe.id, user_id, recipe.name, meal.name, photo_url, instruction, portion, drink_alternate, video_url from meal JOIN recipe ON (meal.id=recipe.meal_id) where (user_id = '%s');''' % (userId)
-            cursor.execute(query)
+                query = '''select recipe.id, user_id, recipe.name, meal.name, photo_url, instruction, portion, drink_alternate, video_url from meal JOIN recipe ON (meal.id=recipe.meal_id) where (user_id = %s);'''
+            cursor.execute(query, [userId])
             connection.commit()
             recipesDb = cursor.fetchall()
 
@@ -40,6 +40,19 @@ class Database:
                 recipe = Recipe(user_id, recipe_name, meal_name, photo_url, instruction, portion, drink_alternate, video_url)
                 recipes.append((recipe_id, recipe))
             return recipes
+
+    def getRecipe(self, recipeId):
+        with psycopg2.connect(self.conn, sslmode='require') as connection:
+            cursor = connection.cursor()
+            query = 'select recipe.id, user_id, recipe.name, meal.name, photo_url, instruction, portion, drink_alternate, video_url from meal JOIN recipe ON (meal.id=recipe.meal_id) WHERE (recipe.id = %s);'
+            
+            cursor.execute(query, [recipeId])
+            connection.commit()
+            recipeDb = cursor.fetchone()
+            
+            recipeObject = Recipe(recipeDb[1], recipeDb[2], recipeDb[3], recipeDb[4], recipeDb[5], recipeDb[6], recipeDb[7], recipeDb[8])
+            recipe = (recipeDb[0], recipeObject)
+            return recipe
 
     def get_meals(self):
         meals = []
@@ -55,6 +68,20 @@ class Database:
                 meals.append((meal_id, meal))
             return meals
 
+    def getIngredientsOfARecipe(self, key):
+        ingredients = []
+        with psycopg2.connect(self.conn, sslmode='require') as connection:
+            cursor = connection.cursor()
+            query = 'select ingredients_of_meal.ingredient_id, ingredient.name, ingredient.protein, ingredient.calorie, ingredient.fat, ingredient.type, ingredients_of_meal.measurement_quantity from ingredients_of_meal JOIN ingredient ON ingredient.id = ingredients_of_meal.ingredient_id WHERE (recipe_id = %s);'
+            cursor.execute(query, [key])
+            connection.commit()
+            ingredientsDB = cursor.fetchall()
+
+            for ingredient_id, recipeName, recipeProtein, recipeCalorie, recipeFat, recipeType, measurementQuantity in ingredientsDB:
+                ingredient = Ingredient(recipeName, recipeProtein, recipeCalorie, recipeFat, recipeType, measurementQuantity)
+                ingredients.append((ingredient_id, ingredient))#be careful, ingredient_id is not unique, there might be multiple elements with different measurements
+            return ingredients
+
     def getIngredients(self):
         ingredients = []
         with psycopg2.connect(self.conn, sslmode='require') as connection:
@@ -65,7 +92,7 @@ class Database:
             ingredientsDB = cursor.fetchall()
 
             for recipeId, recipeName, recipeProtein, recipeCalorie, recipeFat, recipeType in ingredientsDB:
-                ingredient = Ingredient(recipeName, recipeProtein, recipeCalorie, recipeFat, recipeType)
+                ingredient = Ingredient(recipeName, recipeProtein, recipeCalorie, recipeFat, recipeType, 0)
                 ingredients.append((recipeId, ingredient))
             return ingredients
     
@@ -73,8 +100,8 @@ class Database:
         with psycopg2.connect(self.conn, sslmode='require') as connection:
             cursor = connection.cursor()
             for ingredient, measure in zip(ingredients, measures):
-                query = '''insert into ingredients_of_meal (recipe_id, ingredient_id, measurement_quantity) values (%s, (select id from ingredient where (name='%s')), '%s');''' % (recipeId[0], ingredient, measure)
-                cursor.execute(query)
+                query = '''insert into ingredients_of_meal (recipe_id, ingredient_id, measurement_quantity) values (%s, (select id from ingredient where (name=%s)), %s);'''
+                cursor.execute(query, (recipeId[0], ingredient, measure))
 
             connection.commit()
 
@@ -82,8 +109,8 @@ class Database:
         menus = []
         with psycopg2.connect(self.conn, sslmode='require') as connection:
             cursor = connection.cursor()
-            query = '''select id, title, description, created_date, updated_date, notes from "userMenu" where (user_id = '%s');''' % (userId)
-            cursor.execute(query)
+            query = '''select id, title, description, created_date, updated_date, notes from "userMenu" where (user_id = %s);'''
+            cursor.execute(query, [userId])
             connection.commit()
 
             menusDB = cursor.fetchall()
@@ -93,11 +120,38 @@ class Database:
                 menus.append((id, userMenu))
             return menus
 
+    def getMenu(self, menuId):
+        with psycopg2.connect(self.conn, sslmode='require') as connection:
+            cursor = connection.cursor()
+            query = 'select id, title, description, created_date, updated_date, notes from "userMenu" where (id = %s);'
+            
+            cursor.execute(query, [menuId])
+            connection.commit()
+            menuDb = cursor.fetchone()
+            
+            menuObject = Menu(menuDb[1], menuDb[2], menuDb[3], menuDb[4], menuDb[5])
+            menu = (menuDb[0], menuObject)
+            return menu
+
+    def getMenuContents(self, key):
+        meals = []
+        with psycopg2.connect(self.conn, sslmode='require') as connection:
+            cursor = connection.cursor()
+            query = 'select meal.id, meal.name, meal.category_id, meal.photo_url, meal.coisine_name, meal.country_id from meal JOIN "menuContent" on ("menuContent".meal_id = meal.id) WHERE ("menuContent".menu_id = %s)'
+            cursor.execute(query, [key])
+            connection.commit()
+            mealsDB = cursor.fetchall()
+
+            for mealId, mealName, mealCategoryId, mealPhotoUrl, mealCoisineName, mealCountryId in mealsDB:
+                meal = Meal(mealName, mealCategoryId, mealPhotoUrl, mealCoisineName, mealCountryId) #not country name
+                meals.append((mealId, meal))
+            return meals
+
     def addUserMenu(self, userMenu, userId):
         with psycopg2.connect(self.conn, sslmode='require') as connection:
             cursor = connection.cursor()
-            query = '''insert into "userMenu" (title, description, created_date, updated_date, notes, user_id) values ('%s', '%s', %s, %s, '%s', '%s');''' % (userMenu.title, userMenu.description, userMenu.created_date, userMenu.updated_date, userMenu.notes, userId)
-            cursor.execute(query)
+            query = '''insert into "userMenu" (title, description, created_date, updated_date, notes, user_id) values (%s, %s, %s, %s, %s, %s);'''
+            cursor.execute(query, (userMenu.title, userMenu.description, userMenu.created_date, userMenu.updated_date, userMenu.notes, userId))
             connection.commit()
 
             query = 'SELECT id FROM "userMenu" order by id desc;'
@@ -110,10 +164,10 @@ class Database:
         with psycopg2.connect(self.conn, sslmode='require') as connection:
             cursor = connection.cursor()
             for meal in userMeals:
-                query = '''select id from meal where (name = '%s');''' % (meal)
-                cursor.execute(query)
+                query = '''select id from meal where (name = %s);'''
+                cursor.execute(query, [meal])
                 mealId = cursor.fetchone()
-                query = '''insert into "menuContent" (menu_id, meal_id) values  (%s, %s);''' % (menuId, mealId[0])
-                cursor.execute(query)
+                query = '''insert into "menuContent" (menu_id, meal_id) values  (%s, %s);'''
+                cursor.execute(query, (menuId, mealId[0]))
                 connection.commit()
 

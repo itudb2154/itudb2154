@@ -101,20 +101,17 @@ def register():
 
 @app.route('/', methods = ['GET', 'POST'])
 def index():
-    owner = -1
     recipes = db.getRecipes(-1)
-    user = False
-    if session.get("id"):
-        user = True
-        owner = session.get("id")
+    user = session.get("id")
 
-    return render_template('index.html', recipes=recipes, user=user, owner=owner)
+    return render_template('index.html', recipes=recipes, user=user)
 
-@app.route('/menus', methods = ['GET', 'POST'])
+@app.route('/menus/<int:ownerId>', methods = ['GET', 'POST'])
 @login_required
-def menus():
-    
-    userMenus = db.getUserMenus(session.get("id"))
+def menus(ownerId):
+    owner = ownerId
+    user = session.get("id")
+    userMenus = db.getUserMenus(owner)
     dateNow = int(time.time())
 
     for key, menu in userMenus:
@@ -138,10 +135,11 @@ def menus():
            menu.created_date = str(seconds) + " seconds ago"
            continue
 
-    return render_template('menus.html', user=True, userMenus=userMenus)
+    return render_template('menus.html', user=user, userMenus=userMenus, owner=owner)
 
     
 @app.route('/logout', methods = ['GET', 'POST'])
+@login_required
 def logout():
     if session.get("id"):
         session["id"] = None
@@ -154,7 +152,7 @@ def addrecipe():
     if request.method == 'POST':
         #assuming the recipe is given correctly
         print(request.form['meal'])
-        recipe = Recipe(max(session["id"]), request.form['name'], request.form['meal'], " ", request.form['instruction'], request.form['portion'], request.form['drink_alternate'], request.form['video_url'])
+        recipe = Recipe(session["id"], request.form['name'], request.form['meal'], " ", request.form['instruction'], request.form['portion'], request.form['drink_alternate'], request.form['video_url'])
         recipeId = db.add_recipe(recipe)
         
         ingredients = request.form.getlist('ingredient')
@@ -162,15 +160,15 @@ def addrecipe():
 
         db.addRecipeIngredient(ingredients, measures, recipeId)
         
-        return redirect("/")
+        return redirect(url_for('index'))
 
     meals = db.get_meals()
     ingredients = db.getIngredients()
 
-    return render_template('addrecipe.html', meals=meals, ingredients=ingredients, user=True)
+    return render_template('addrecipe.html', meals=meals, ingredients=ingredients, user=session.get("id"))
 
 
-@app.route('/menu/add', methods = ['GET', 'POST'])
+@app.route('/menus/add', methods = ['GET', 'POST'])
 @login_required
 def addMenu():
     if request.method == 'POST':
@@ -187,15 +185,72 @@ def addMenu():
 
             db.addUserMenuMeals(userMeals, menuId[0])
 
-            return redirect("/menus")
+            url = "/menus/" + str(session.get("id"))
+            return redirect(url)
 
         elif request.form['addMenu'] == "addPage":
             meals = db.get_meals()
-            return render_template('addmenu.html', meals=meals, user=True)
+            return render_template('addmenu.html', meals=meals, user=session.get("id"))
 
-@app.route('/myrecipes', methods = ['GET', 'POST'])
+@app.route('/recipes/<int:ownerId>', methods = ['GET', 'POST'])
 @login_required
-def myRecipes():
-    recipes = db.getRecipes(session.get("id"))
+def recipes(ownerId):
+    recipes = db.getRecipes(ownerId) #show the recipes of the owner, not user
 
-    return render_template('recipes.html', recipes=recipes, user=True)
+    if request.method == 'POST':
+        if request.form['button'] == "addRecipe" and ownerId == session.get("id"): #click the button only if you are the owner
+            return redirect(url_for('addrecipe'))
+
+    owner = ownerId
+    user = session.get("id")
+    #if session.get("id") == ownerId:
+        #owner = True    #if i am the owner, i can change this page
+
+    return render_template('recipes.html', recipes=recipes, user=user, owner=owner)
+
+
+@app.route('/recipes/<int:ownerId>/recipe/<int:recipeId>', methods = ['GET', 'POST'])
+@login_required
+def recipe(ownerId, recipeId):
+    owner = ownerId
+
+    if request.method == 'POST':
+        recipe = db.getRecipe(recipeId)
+        ingredients = db.getIngredientsOfARecipe(recipeId)
+
+        if request.form['button'] == "view":
+            #only show contents, dont edit
+            return render_template("recipe.html", recipe=recipe, ingredients=ingredients, user=session.get("id"), owner=owner)
+
+        elif request.form['button'] == "edit":
+
+            #only show contents, dont edit
+
+            return render_template("recipe.html", recipe=recipe, ingredients=ingredients, user=session.get("id"), owner=owner)
+
+    return render_template('recipe.html', recipe=recipe, ingredients=ingredients, user=session.get("id"), owner=owner)
+
+@app.route('/menus/<int:ownerId>/menu/<int:menuId>', methods = ['GET', 'POST'])
+@login_required
+def menu(ownerId, menuId):
+    owner = ownerId
+    user=session.get("id")
+
+    menu = db.getMenu(menuId)
+    meals = db.getMenuContents(menuId)
+
+    if request.method == 'POST':
+        if request.form.get('button') == "view":
+            #only show contents, dont edit
+            return render_template("menu.html", menu=menu, user=user, owner=owner, meals=meals)
+
+        elif request.form.get('button') == "edit":
+
+            #only show contents, dont edit
+
+            return render_template("menu.html", menu=menu, user=user, owner=owner, meals=meals)
+
+    return render_template('menu.html', menu=menu, user=user, owner=owner, meals=meals)
+
+
+
