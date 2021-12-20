@@ -9,13 +9,15 @@
         <div class="py-5 bg-light">
             <div class="container">
                 <div class="justify-content-center">
-                    <img src="{{ recipe[1].photo_url }}" class="w-25" height="325">
-                    <div class="float-end" style="width:70%">
-                        <h1 class="display-3">{{ recipe[1].recipe_name }}</h1>
-                        <h3 class="display-6">A {{ recipe[1].meal_name }} recipe</h3>
-                        
-                        <div class="mt-5">
-                            <p>{{ recipe[1].instruction }}</p>
+                    <div class="overflow-hidden">
+                        <img src="{{ recipe[1].photo_url }}" class="w-25" height="325">
+                        <div class="float-end" style="width:70%">
+                            <h1 class="display-3">{{ recipe[1].recipe_name }}</h1>
+                            <h3 class="display-6">A {{ recipe[1].meal_name }} recipe</h3>
+                            
+                            <div class="mt-5">
+                                <p>{{ recipe[1].instruction }}</p>
+                            </div>
                         </div>
                     </div>
                     <div>
@@ -35,6 +37,44 @@
                         {%endfor%}
                         {%endif%}
                         </div>
+
+                        <div class="text-center mt-3">
+                            <h1 class="display-3">Comments</h1>
+                        </div>
+
+                        {%if comments%}
+                        {%for key, comment in comments%}
+                        <div class="card mb-3">
+                            <div class="card-body">
+                              <h5 class="card-title">{{ comment.user_name }}</h5>
+                              <p class="card-text" style="color:{{comment.text_color}};">{{ comment.message }}</p>
+                              {%if user==comment.user_id%}<a href="#" class="btn btn-primary">Edit</a>{%endif%}
+                              <div class="mt-1"><small class="text-muted"> Created at {{ comment.created_date }}</small></div>
+                            </div>
+                        </div>
+                        {%endfor%}
+                        {%endif%}
+
+                        {%if not comments%}
+                        <div class="card mb-5">
+                            <div class="card-body">
+                              <h5 class="card-title">There are no comments yet. You can be the first one to comment!</h5>
+                            </div>
+                        </div>
+                        {%endif%}
+
+                        <form action="/recipes/{{owner}}/recipe/{{recipe[0]}}" method="POST">
+                            <div class="mb-3 mt-3">
+                              <label for="comment" class="form-label">Make a Comment</label>
+                              <textarea class="form-control" rows="7" cols="175" placeholder="You can comment here" id="comment" name="message"></textarea>
+                              <div id="emailHelp" class="form-text">You have a limit of 200 characters.</div>
+                            </div>
+
+                            <label for="exampleColorInput" class="form-label">You can pick a text color for your comment! (please do not choose light colors)</label>
+                            <input type="color" class="form-control form-control-color mb-3" id="exampleColorInput" name="color" value="#563d7c" title="Choose your color">
+                            
+                            <button type="submit" class="btn btn-primary" name="button" value="comment">Submit</button>
+                        </form>
                     </div>
 
 

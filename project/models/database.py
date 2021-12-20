@@ -4,6 +4,8 @@ from project.models.ingredient import Ingredient
 from .recipe import *
 from .meal import *
 from .menu import *
+from .user import *
+from .comment import *
 
 class Database:
     def __init__(self, conn):
@@ -137,13 +139,14 @@ class Database:
         meals = []
         with psycopg2.connect(self.conn, sslmode='require') as connection:
             cursor = connection.cursor()
-            query = 'select meal.id, meal.name, meal.category_id, meal.photo_url, meal.coisine_name, meal.country_id from meal JOIN "menuContent" on ("menuContent".meal_id = meal.id) WHERE ("menuContent".menu_id = %s)'
+            query = 'select meal.id, meal.name, category.name, meal.photo_url, meal.coisine_name, country.name from meal JOIN "menuContent" on ("menuContent".meal_id = meal.id) JOIN country ON (country.id = meal.country_id) JOIN category ON (category.id = meal.category_id) WHERE ("menuContent".menu_id = %s)'
             cursor.execute(query, [key])
             connection.commit()
             mealsDB = cursor.fetchall()
 
-            for mealId, mealName, mealCategoryId, mealPhotoUrl, mealCoisineName, mealCountryId in mealsDB:
-                meal = Meal(mealName, mealCategoryId, mealPhotoUrl, mealCoisineName, mealCountryId) #not country name
+            for mealId, mealName, mealCategoryName, mealPhotoUrl, mealCoisineName, mealCountryName in mealsDB:
+                meal = Meal(mealName, mealCategoryName, mealPhotoUrl, mealCoisineName, mealCountryName) #not country name
+                print(mealCategoryName)
                 meals.append((mealId, meal))
             return meals
 
@@ -170,4 +173,38 @@ class Database:
                 query = '''insert into "menuContent" (menu_id, meal_id) values  (%s, %s);'''
                 cursor.execute(query, (menuId, mealId[0]))
                 connection.commit()
+
+
+    def getUser(self, userId):
+        with psycopg2.connect(self.conn, sslmode='require') as connection:
+            cursor = connection.cursor()
+            query = 'select "user".id, "user".name, "user".surname, "user".mail, "user".password, "user".age, country.name from "user" JOIN country ON ("user".country_id = country.id) where ("user".id = %s);'
+            
+            cursor.execute(query, [userId])
+            connection.commit()
+            userDb = cursor.fetchone()
+            
+            user = User(userDb[0], userDb[1], userDb[2], userDb[3], userDb[4], userDb[5], userDb[6])
+            return user
+
+    def addComment(self, comment):
+        with psycopg2.connect(self.conn, sslmode='require') as connection:
+            cursor = connection.cursor()
+            query = '''insert into "comment" (user_id, recipe_id, message, created_date, updated_date, text_color, language) values (%s, %s, %s,TIMESTAMP %s, %s, %s, %s);'''
+            cursor.execute(query, (comment.user_id, comment.recipe_id, comment.message, comment.created_date, comment.updated_date, comment.text_color, comment.language))
+            connection.commit()
+
+    def getComments(self, recipeId):
+        comments = []
+        with psycopg2.connect(self.conn, sslmode='require') as connection:
+            cursor = connection.cursor()
+            query = 'select comment.id, comment.user_id, comment.message, comment.created_date, comment.updated_date, comment.text_color, comment.language, "user".name from comment JOIN "user" ON (comment.user_id = "user".id) WHERE ("comment".recipe_id = %s)'
+            cursor.execute(query, [recipeId])
+            connection.commit()
+            commentsDb = cursor.fetchall()
+
+            for commentId, user_id, message, created_date, updated_date, text_color, language, name in commentsDb:
+                comment = Comment(user_id, recipeId, message, created_date, updated_date, text_color, language, name) 
+                comments.append((commentId, comment))
+            return comments
 

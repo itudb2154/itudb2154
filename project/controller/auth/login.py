@@ -213,6 +213,8 @@ def recipes(ownerId):
 @login_required
 def recipe(ownerId, recipeId):
     owner = ownerId
+    user=session.get("id")
+    comments = db.getComments(recipeId)
 
     if request.method == 'POST':
         recipe = db.getRecipe(recipeId)
@@ -220,15 +222,23 @@ def recipe(ownerId, recipeId):
 
         if request.form['button'] == "view":
             #only show contents, dont edit
-            return render_template("recipe.html", recipe=recipe, ingredients=ingredients, user=session.get("id"), owner=owner)
+            return render_template("recipe.html", recipe=recipe, ingredients=ingredients, user=user, owner=owner, comments=comments)
 
         elif request.form['button'] == "edit":
-
             #only show contents, dont edit
+            return render_template("recipe.html", recipe=recipe, ingredients=ingredients, user=user, owner=owner, comments=comments)
 
-            return render_template("recipe.html", recipe=recipe, ingredients=ingredients, user=session.get("id"), owner=owner)
+        elif request.form['button'] == "comment":
+            #the user in the session is making a comment
+            comment = Comment(user, recipeId, request.form['message'], datetime.datetime.now(), None, request.form['color'], None, None)
+            db.addComment(comment)
 
-    return render_template('recipe.html', recipe=recipe, ingredients=ingredients, user=session.get("id"), owner=owner)
+            comments = db.getComments(recipeId) #get new comments
+
+            return render_template('recipe.html', recipe=recipe, ingredients=ingredients, user=user, owner=owner, comments=comments)
+
+
+    return render_template('recipe.html', recipe=recipe, ingredients=ingredients, user=user, owner=owner, comments=comments)
 
 @app.route('/menus/<int:ownerId>/menu/<int:menuId>', methods = ['GET', 'POST'])
 @login_required
@@ -253,4 +263,11 @@ def menu(ownerId, menuId):
     return render_template('menu.html', menu=menu, user=user, owner=owner, meals=meals)
 
 
+@app.route('/user/<int:userId>', methods = ['GET', 'POST'])
+@login_required
+def user(userId):
+    user = session.get("id")      #current user in the session
+    owner = db.getUser(userId)  #owner of the current page
 
+    isOwner = (user == userId)  
+    return render_template("user.html", user=user, owner=owner, isOwner=isOwner)

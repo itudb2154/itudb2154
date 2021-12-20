@@ -1,0 +1,80 @@
+{% extends 'layout.html' %}
+
+{% block head_ext %}
+    <title>User</title>
+{% endblock head_ext %}
+
+{% block content %}
+
+        <div class="py-5 bg-light">
+            <div class="container">
+                <div class="justify-content-start">
+                    <div class="mt-1" style="width:100%">
+                        <h1 class="display-3">Profile Page</h1>
+                        <h3 class="display-6">of <b>{{ owner.name }} {%if owner.surname!= None%}{{ owner.surname }} {% endif %}</b></h3>
+                        {%if owner.age!= None%}<h3 class="display-6">age <b>{{ owner.age }}</b></h3>{% endif %}
+                        {%if owner.country!= None%}<h3 class="display-6">country <b>{{ owner.country }}</b></h3>{% endif %}
+
+                    </div>
+
+                    {%if isOwner%}
+                    <div>
+                        <div class="text-center">
+                            <h1 class="display-3">Your Creations</h1>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <div class="card text-center">
+                                    <div class="card-body">
+                                      <h5 class="card-title">Your Menus</h5>
+                                      <a href="/menus/{{ user }}" class="btn btn-primary">Menus</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="card text-center">
+                                    <div class="card-body">
+                                      <h5 class="card-title">Your Recipes</h5>
+                                      <a href="/recipes/{{ user }}" class="btn btn-primary">Recipes</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <h1 class="display-3">Settings</h1>
+                        </div>
+                        <div class="card text-center">
+                            <div class="card-body">
+                              <h5 class="card-title">Name</h5>
+                              <p class="card-text">{{ owner.name }}</p>
+                              <a href="#" class="btn btn-primary">Change name</a>
+                            </div>
+                        </div>
+                        <div class="card text-center">
+                            <div class="card-body">
+                              <h5 class="card-title">Surname</h5>
+                              <p class="card-text">{{ owner.surname }}</p>
+                              <a href="#" class="btn btn-primary">Change surname</a>
+                            </div>
+                        </div>
+                        <div class="card text-center">
+                            <div class="card-body">
+                              <h5 class="card-title">Age</h5>
+                              <p class="card-text">{{ owner.age }}</p>
+                              <a href="#" class="btn btn-primary">Change age</a>
+                            </div>
+                        </div>
+                        <div class="card text-center">
+                            <div class="card-body">
+                              <h5 class="card-title">Country</h5>
+                              <p class="card-text">{{ owner.country }}</p>
+                              <a href="#" class="btn btn-primary">Change country</a>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                </div>            
+            </div>
+        </div>
+{% endblock %}
+

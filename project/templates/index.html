@@ -20,13 +20,14 @@
                     <p class="card-text"> {{recipe.meal_name}} </p>
                     <div class="d-flex justify-content-between align-items-center">
                       <div class="btn-group">
-                        <form action="/recipe" method="POST">
+                        <form action="/recipes/{{ recipe.user_id }}/recipe/{{key}}" method="POST">
                           <button type="submit" name="button" value="view" class="btn btn-sm btn-outline-secondary">View</button>
                           {%if user == recipe.user_id %}
                           {%if user%}<button type="submit" name="button" value={{key}} class="btn btn-sm btn-outline-secondary">Edit</button>{%endif%}
                           {%endif%}
                       </form>
                       </div>
+                      <small class="border border-secondary rounded py-1"><a href="/user/{{ recipe.user_id }}" class="text-decoration-none text-black">Owners' Profile</a></small>
                       <small class="text-muted">{{recipe.recipe_name}}</small>
                     </div>
                   </div>
