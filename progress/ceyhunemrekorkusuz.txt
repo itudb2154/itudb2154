@@ -1,2 +1,3 @@
 the basic mvc structure and some login operations are added to the project.
 classes and login requires are added.
+adding comments and changing some css
