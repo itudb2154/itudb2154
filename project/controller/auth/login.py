@@ -93,7 +93,7 @@ def register():
 
         cursor.execute('''SELECT * FROM "user";''')
         print(cursor.fetchall())
-        success = True
+
         return render_template('register.html', success=True),  {"Refresh": "2; url=/login"}
 
     return render_template('register.html')
@@ -215,11 +215,11 @@ def recipe(ownerId, recipeId):
     owner = ownerId
     user=session.get("id")
     comments = db.getComments(recipeId)
+    recipe = db.getRecipe(recipeId)
+    ingredients = db.getIngredientsOfARecipe(recipeId)
 
     if request.method == 'POST':
-        recipe = db.getRecipe(recipeId)
-        ingredients = db.getIngredientsOfARecipe(recipeId)
-
+        
         if request.form['button'] == "view":
             #only show contents, dont edit
             return render_template("recipe.html", recipe=recipe, ingredients=ingredients, user=user, owner=owner, comments=comments)
@@ -262,6 +262,7 @@ def menu(ownerId, menuId):
 
     return render_template('menu.html', menu=menu, user=user, owner=owner, meals=meals)
 
+#My profile should be created.
 
 @app.route('/user/<int:userId>', methods = ['GET', 'POST'])
 @login_required
@@ -271,3 +272,4 @@ def user(userId):
 
     isOwner = (user == userId)  
     return render_template("user.html", user=user, owner=owner, isOwner=isOwner)
+

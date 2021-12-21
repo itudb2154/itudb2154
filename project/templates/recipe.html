@@ -12,8 +12,16 @@
                     <div class="overflow-hidden">
                         <img src="{{ recipe[1].photo_url }}" class="w-25" height="325">
                         <div class="float-end" style="width:70%">
-                            <h1 class="display-3">{{ recipe[1].recipe_name }}</h1>
-                            <h3 class="display-6">A {{ recipe[1].meal_name }} recipe</h3>
+                            <div style="display: flex;">
+                                <div style="width: 70%">
+                                    <h1 class="display-3">{{ recipe[1].recipe_name }}</h1>
+                                    <h3 class="display-6">A {{ recipe[1].meal_name }} recipe</h3>
+                                </div>
+                                <div class="mt-3" style="flex-grow: 1;">
+                                    <a href style="display:block; background-color: #DEE1E6; width: 140px; height:140px; border-radius: 50%;"><img style="padding:25px;" src="/static/img/profile.png" width="140" height="auto"></a>
+                                </div>
+                            </div>
+                            
                             
                             <div class="mt-5">
                                 <p>{{ recipe[1].instruction }}</p>
@@ -63,7 +71,7 @@
                         </div>
                         {%endif%}
 
-                        <form action="/recipes/{{owner}}/recipe/{{recipe[0]}}" method="POST">
+                        <form action="/recipes/{{recipe[0]}}" method="POST">
                             <div class="mb-3 mt-3">
                               <label for="comment" class="form-label">Make a Comment</label>
                               <textarea class="form-control" rows="7" cols="175" placeholder="You can comment here" id="comment" name="message"></textarea>
