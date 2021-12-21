@@ -192,7 +192,7 @@ def addMenu():
             meals = db.get_meals()
             return render_template('addmenu.html', meals=meals, user=session.get("id"))
 
-@app.route('/recipes/<int:ownerId>', methods = ['GET', 'POST'])
+@app.route('/user/<int:ownerId>/recipes', methods = ['GET', 'POST'])
 @login_required
 def recipes(ownerId):
     recipes = db.getRecipes(ownerId) #show the recipes of the owner, not user
@@ -208,15 +208,15 @@ def recipes(ownerId):
 
     return render_template('recipes.html', recipes=recipes, user=user, owner=owner)
 
-
-@app.route('/recipes/<int:ownerId>/recipe/<int:recipeId>', methods = ['GET', 'POST'])
+@app.route('/recipe/<int:recipeId>', methods = ['GET', 'POST'])
 @login_required
-def recipe(ownerId, recipeId):
-    owner = ownerId
+def recipe(recipeId):
+    
     user=session.get("id")
     comments = db.getComments(recipeId)
     recipe = db.getRecipe(recipeId)
     ingredients = db.getIngredientsOfARecipe(recipeId)
+    owner = recipe[1].user_id
 
     if request.method == 'POST':
         
@@ -225,8 +225,10 @@ def recipe(ownerId, recipeId):
             return render_template("recipe.html", recipe=recipe, ingredients=ingredients, user=user, owner=owner, comments=comments)
 
         elif request.form['button'] == "edit":
-            #only show contents, dont edit
-            return render_template("recipe.html", recipe=recipe, ingredients=ingredients, user=user, owner=owner, comments=comments)
+            if user==owner:
+                return render_template("recipe.html", recipe=recipe, ingredients=ingredients, edit=True)
+            return 
+            
 
         elif request.form['button'] == "comment":
             #the user in the session is making a comment
@@ -238,7 +240,7 @@ def recipe(ownerId, recipeId):
             return render_template('recipe.html', recipe=recipe, ingredients=ingredients, user=user, owner=owner, comments=comments)
 
 
-    return render_template('recipe.html', recipe=recipe, ingredients=ingredients, user=user, owner=owner, comments=comments)
+    return render_template('recipe.html', recipe=recipe, ingredients=ingredients, user=user, owner=owner, comments=comments,)
 
 @app.route('/menus/<int:ownerId>/menu/<int:menuId>', methods = ['GET', 'POST'])
 @login_required

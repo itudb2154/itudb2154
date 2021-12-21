@@ -15,7 +15,11 @@
     <title>base</title>
     {% endblock head_ext %}
   </head>
-  
+  <style>
+    .btn-dark:hover {
+      background-color: #3A3A3A;
+    }
+  </style>
 
   <body class="bg-light">
     <header class="p-3 bg-dark text-white">
@@ -29,7 +33,7 @@
               <li><a href="/" class="nav-link px-2 text-white">Home</a></li>
               {%if user%}
               <li><a href="/menus/{{ user }}" class="nav-link px-2 text-white">My Menus</a></li>
-              <li><a href="/recipes/{{ user }}" class="nav-link px-2 text-white">My Recipes</a></li>
+              <li><a href="/user/{{ user }}/recipes" class="nav-link px-2 text-white">My Recipes</a></li>
               <li><a href="/user/{{ user }}" class="nav-link px-2 text-white">My Profile</a></li>
               {%endif%}
             </ul>

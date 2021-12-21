@@ -12,12 +12,17 @@
                     <div class="overflow-hidden">
                         <img src="{{ recipe[1].photo_url }}" class="w-25" height="325">
                         <div class="float-end" style="width:70%">
-                            <div style="display: flex;">
-                                <div style="width: 70%">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    {%if edit %}
+                                    <input type="text" value="{{recipe[1].recipe_name}}">
+                                    {%endif %}
+                                    {%if not edit %}
                                     <h1 class="display-3">{{ recipe[1].recipe_name }}</h1>
                                     <h3 class="display-6">A {{ recipe[1].meal_name }} recipe</h3>
+                                    {% endif %}
                                 </div>
-                                <div class="mt-3" style="flex-grow: 1;">
+                                <div class="mt-3">
                                     <a href style="display:block; background-color: #DEE1E6; width: 140px; height:140px; border-radius: 50%;"><img style="padding:25px;" src="/static/img/profile.png" width="140" height="auto"></a>
                                 </div>
                             </div>
@@ -39,7 +44,7 @@
                             <div class="card-body">
                               <h5 class="card-title">{{ ingredient.name }}</h5>
                               <p class="card-text">{{ ingredient.measurement_quantity }}</p>
-                              {%if user==owner%}<a href="#" class="btn btn-primary">Edit</a>{%endif%}
+                              {%if user==owner%}<a href="#" class="btn btn-dark">Edit</a>{%endif%}
                             </div>
                         </div>
                         {%endfor%}
@@ -71,17 +76,17 @@
                         </div>
                         {%endif%}
 
-                        <form action="/recipes/{{recipe[0]}}" method="POST">
+                        <form action="/recipe/{{recipe[0]}}" method="POST">
                             <div class="mb-3 mt-3">
                               <label for="comment" class="form-label">Make a Comment</label>
                               <textarea class="form-control" rows="7" cols="175" placeholder="You can comment here" id="comment" name="message"></textarea>
                               <div id="emailHelp" class="form-text">You have a limit of 200 characters.</div>
                             </div>
 
-                            <label for="exampleColorInput" class="form-label">You can pick a text color for your comment! (please do not choose light colors)</label>
+                            <label class="form-label">You can pick a text color for your comment! (please do not choose light colors)</label>
                             <input type="color" class="form-control form-control-color mb-3" id="exampleColorInput" name="color" value="#563d7c" title="Choose your color">
                             
-                            <button type="submit" class="btn btn-primary" name="button" value="comment">Submit</button>
+                            <button type="submit" class="btn btn-dark" name="button" value="comment">Submit</button>
                         </form>
                     </div>
 

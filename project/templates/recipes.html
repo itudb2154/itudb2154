@@ -20,7 +20,7 @@
                     <p class="card-text"> {{recipe.meal_name}} </p>
                     <div class="d-flex justify-content-between align-items-center">
                       <div class="btn-group">
-                        <form action="/recipes/{{owner}}/recipe/{{key}}" method="POST">
+                        <form action="/recipe/{{key}}" method="POST">
                           <button type="submit" name="button" value="view" class="btn btn-sm btn-outline-secondary">View</button>
                           {%if owner == user%}<button type="submit" name="button" value="edit" class="btn btn-sm btn-outline-secondary">Edit</button>{%endif%}
                         </form>
