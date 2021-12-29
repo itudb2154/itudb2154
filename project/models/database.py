@@ -208,3 +208,46 @@ class Database:
                 comments.append((commentId, comment))
             return comments
 
+    
+    def updateUser(self, myDict, userId):
+        with psycopg2.connect(self.conn, sslmode='require') as connection:
+            cursor = connection.cursor()
+
+            #myTuple = ()
+            arr = []
+            query = 'UPDATE "user" SET '
+            substring = '%s = %s, '
+            for key, value in myDict:
+                print(key)
+                print(value)
+
+                #myTuple += key,
+                #myTuple += (value,)
+                arr.append(key)     #key eklerken yanında single quote (') da ekliyor
+                arr.append(value)
+
+                query += substring
+            
+            query = query[:-2]
+            query += ' WHERE (id = %s);'
+            #myTuple += (userId,)
+            arr.append(userId)
+
+            print(arr)              #bu single quote ları çıkartmak lazım ki cursor.execute() doğru çalışsın
+            #for i in range(len(arr)):
+                #arr[i] = arr[i].replace("'", "")
+
+            cursor.execute(query, arr)
+            connection.commit()
+            #we should be updated the "user" table correctly
+            print("successful")
+
+            query = 'select "user".id, "user".name, "user".surname, "user".mail, "user".password, "user".age, country.name from "user" JOIN country ON ("user".country_id = country.id) where ("user".id = %s);'
+            
+            cursor.execute(query, [userId])
+            connection.commit()
+            userDb = cursor.fetchone()
+            
+            user = User(userDb[0], userDb[1], userDb[2], userDb[3], userDb[4], userDb[5], userDb[6])
+            return user
+

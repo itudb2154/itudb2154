@@ -272,6 +272,15 @@ def user(userId):
     user = session.get("id")      #current user in the session
     owner = db.getUser(userId)  #owner of the current page
 
+    if request.method == 'POST' and request.form.get('button') == "change-user":
+        myDict = []
+        for key, value in request.form.items():
+            if(value != "change-user"):
+                myDict.append((key, value))
+                #myDict[i].value galiba
+        
+        owner = db.updateUser(myDict, userId)
+
     isOwner = (user == userId)  
     return render_template("user.html", user=user, owner=owner, isOwner=isOwner)
 
