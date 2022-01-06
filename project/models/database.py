@@ -6,6 +6,7 @@ from .meal import *
 from .menu import *
 from .user import *
 from .comment import *
+from .country import *
 
 class Database:
     def __init__(self, conn):
@@ -216,14 +217,15 @@ class Database:
             #myTuple = ()
             arr = []
             query = 'UPDATE "user" SET '
-            substring = '%s = %s, '
             for key, value in myDict:
+                substring = ' = %s, '
+                substring = key + substring
                 print(key)
                 print(value)
 
                 #myTuple += key,
                 #myTuple += (value,)
-                arr.append(key)     #key eklerken yanında single quote (') da ekliyor
+                #arr.append(key)     #key eklerken yanında single quote (') da ekliyor
                 arr.append(value)
 
                 query += substring
@@ -251,3 +253,37 @@ class Database:
             user = User(userDb[0], userDb[1], userDb[2], userDb[3], userDb[4], userDb[5], userDb[6])
             return user
 
+    def getAllCountries(self):
+        countries = []
+        with psycopg2.connect(self.conn, sslmode='require') as connection:
+            cursor = connection.cursor()
+            query = 'select id, name FROM country;'
+            cursor.execute(query)
+            connection.commit()
+            countriesDb = cursor.fetchall()
+
+            for countryId, name in countriesDb:
+                country = Country(name) 
+                countries.append((countryId, country))
+            return countries
+
+    def getAllUsers(self):
+        users = []
+        with psycopg2.connect(self.conn, sslmode='require') as connection:
+            cursor = connection.cursor()
+            query = 'select id, name, surname, mail, password, age, country_id FROM "user";'
+            cursor.execute(query)
+            connection.commit()
+            usersDb = cursor.fetchall()
+
+            for userId, name, surname, mail, password, age, countryId in usersDb:
+                user = User(userId, name, surname, mail, password, age, countryId) 
+                users.append((userId, user))
+            return users
+
+    def deleteUser(self, id2delete):
+        with psycopg2.connect(self.conn, sslmode='require') as connection:
+            cursor = connection.cursor()
+            query = 'DELETE FROM "user" WHERE id=%s;'
+            cursor.execute(query, [id2delete])
+            connection.commit()

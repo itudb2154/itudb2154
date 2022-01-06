@@ -281,6 +281,22 @@ def user(userId):
         
         owner = db.updateUser(myDict, userId)
 
-    isOwner = (user == userId)  
-    return render_template("user.html", user=user, owner=owner, isOwner=isOwner)
+    countries = db.getAllCountries()
+    isOwner = (user == userId)
+    return render_template("user.html", user=user, owner=owner, isOwner=isOwner, countries=countries)
+
+
+@app.route('/adminPanel', methods = ['GET', 'POST'])
+@login_required
+def admin():
+    user = session.get("id")      #current user in the session
+
+    if request.method == 'POST' and request.form.get('delete-user'):
+        id2delete = request.form['delete-user']
+        print(id2delete)
+        db.deleteUser(id2delete)
+
+    allUsers = db.getAllUsers()
+
+    return render_template("adminPanel.html", user=user, allUsers = allUsers)
 

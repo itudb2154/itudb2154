@@ -72,7 +72,7 @@
                                     <div class="card-body">
                                     <h5 class="card-title">Country</h5>
                                     <p class="card-text">{{ owner.country }}</p>
-                                    <button type="button" class="btn btn-primary convert2input" id="country">Change country</button>
+                                    <button type="button" class="btn btn-primary dropdown-countries" id="country">Change country</button>
                                     </div>
                                 </div>
 
@@ -81,7 +81,7 @@
                         </div>
                     {% endif %}
 
-                </div>            
+                </div>           
             </div>
         </div>
         <script>
@@ -99,6 +99,19 @@
             $("#submit-form").removeClass("invisible");
                 
             input.select();
+        });
+
+        //for the dropdown countries menu
+        $(".dropdown-countries").click(function() {
+            $(this).prev().replaceWith('<select class="form-select" name="country_id" aria-label="Default select example"><option selected>Select a country from the dropdown</option>{%if countries%}{%for key, country in countries%}<option value="{{key}}">{{country.name}}</option>{%endfor%}{%endif%}</select>');
+            //$(this).prev().addClass("w-25 d-flex justify-content-center");
+            //$(this).prev().addClass("d-inline card-text mb-2");
+
+            //$(this).prev().attr("name", $(this).attr("id"));
+
+            $(this).remove();
+
+            $("#submit-form").removeClass("invisible");
         });
         </script>
 {% endblock %}

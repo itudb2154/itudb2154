@@ -28,7 +28,8 @@ TABLE_CREATE_QUERY = [
             "mail" VARCHAR(80),
             "password" VARCHAR(80),
             "age" INTEGER,
-            "country_id" INTEGER NOT NULL
+            "country_id" INTEGER NOT NULL,
+            "role_id" INTEGER NOT NULL
             )''',
  
         '''CREATE TABLE IF NOT EXISTS "recipe" (
@@ -63,6 +64,7 @@ TABLE_CREATE_QUERY = [
             )''',
 
         '''CREATE TABLE IF NOT EXISTS "ingredients_of_meal" (
+            "id" SERIAL PRIMARY KEY,
             "recipe_id" INTEGER NOT NULL,
             "ingredient_id" INTEGER NOT NULL,
             "measurement_quantity" VARCHAR(60)
@@ -84,29 +86,29 @@ TABLE_CREATE_QUERY = [
             )''',
 
 
-        '''ALTER TABLE "meal" ADD FOREIGN KEY ("country_id") REFERENCES "country" ("id") ON DELETE CASCADE ON UPDATE CASCADE''',
+        '''ALTER TABLE "meal" ADD FOREIGN KEY ("country_id") REFERENCES "country" ("id") ON DELETE SET NULL ON UPDATE CASCADE''',
 
-        '''ALTER TABLE "meal" ADD FOREIGN KEY ("category_id") REFERENCES "category" ("id")''',
+        '''ALTER TABLE "meal" ADD FOREIGN KEY ("category_id") REFERENCES "category" ("id") ON DELETE SET NULL ON UPDATE CASCADE''',
 
-        '''ALTER TABLE "user" ADD FOREIGN KEY ("country_id") REFERENCES "country" ("id")''',
+        '''ALTER TABLE "user" ADD FOREIGN KEY ("country_id") REFERENCES "country" ("id") ON DELETE SET NULL ON UPDATE CASCADE''',
 
-        '''ALTER TABLE "recipe" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("id")''',
+        '''ALTER TABLE "recipe" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("id") ON DELETE CASCADE ON UPDATE CASCADE''',
 
-        '''ALTER TABLE "recipe" ADD FOREIGN KEY ("meal_id") REFERENCES "meal" ("id")''',
+        '''ALTER TABLE "recipe" ADD FOREIGN KEY ("meal_id") REFERENCES "meal" ("id") ON DELETE CASCADE ON UPDATE CASCADE''',
 
-        '''ALTER TABLE "comment" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("id")''',
+        '''ALTER TABLE "comment" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("id") ON DELETE CASCADE ON UPDATE CASCADE''',
 
-        '''ALTER TABLE "comment" ADD FOREIGN KEY ("recipe_id") REFERENCES "recipe" ("id")''',
+        '''ALTER TABLE "comment" ADD FOREIGN KEY ("recipe_id") REFERENCES "recipe" ("id") ON DELETE CASCADE ON UPDATE CASCADE''',
 
-        '''ALTER TABLE "ingredients_of_meal" ADD FOREIGN KEY ("recipe_id") REFERENCES "recipe" ("id")''',
+        '''ALTER TABLE "ingredients_of_meal" ADD FOREIGN KEY ("recipe_id") REFERENCES "recipe" ("id") ON DELETE CASCADE ON UPDATE CASCADE''',
 
-        '''ALTER TABLE "ingredients_of_meal" ADD FOREIGN KEY ("ingredient_id") REFERENCES "ingredient" ("id")''',
+        '''ALTER TABLE "ingredients_of_meal" ADD FOREIGN KEY ("ingredient_id") REFERENCES "ingredient" ("id") ON DELETE SET NULL ON UPDATE CASCADE''',
 
-        '''ALTER TABLE "userMenu" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("id")''',
+        '''ALTER TABLE "userMenu" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("id") ON DELETE CASCADE ON UPDATE CASCADE''',
 
         '''ALTER TABLE "menuContent" ADD FOREIGN KEY ("menu_id") REFERENCES "userMenu" ("id") ON DELETE CASCADE ON UPDATE CASCADE''',
 
-        '''ALTER TABLE "menuContent" ADD FOREIGN KEY ("meal_id") REFERENCES "meal" ("id") ON DELETE CASCADE ON UPDATE CASCADE''',
+        '''ALTER TABLE "menuContent" ADD FOREIGN KEY ("meal_id") REFERENCES "meal" ("id") ON DELETE SET NULL ON UPDATE CASCADE''',
 
 
 ]
