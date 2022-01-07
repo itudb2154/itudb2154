@@ -50,7 +50,7 @@
                                             {%if user==owner%}
                                                 <input type="text" name="ing_of_meals_id" value="{{key}}" style="display:none">
                                                 <button type="button" class="btn btn-outline-secondary dropdown-ingredient">Edit</button>
-                                                <button type="submit" name="button" class="btn btn-outline-primary update-btn" id="{{key}}" value="updateIng">Update</button>
+                                                <button type="submit" style="display:none;" name="button" class="btn btn-outline-primary update-btn" id="{{key}}" value="updateIng">Update</button>
                                                 <button type="submit" name="button" class="btn btn-outline-danger" value="deleteIng" id="{{key}}">Delete</button>
                                             {% endif %}
                                             </form>
@@ -86,7 +86,7 @@
                                 {%if user==comment.user_id%}<button type="submit" class="btn btn-danger" name="button" value="delete-comment">Delete Comment</button>{%endif%}
                                 {%if user==comment.user_id%}<input type="text" class="invisible" name="id2delete" value="{{key}}">{%endif%}
                                 <input value="{{key}}", type="text", class="invisible", name="comment_id">
-                                <div class="mt-1"><small class="text-muted"> Created {{ comment.created_date }}. Language is <span>{{ comment.language }}</span></small></div>
+                                <div class="mt-1 language-div"><small class="text-muted"> Created {{ comment.created_date }}. Language is <span id="language-span">{{ comment.language }}</span></small></div>
                                 {%if comment.updated_date%}<div class="mt-1"><small class="text-muted"> Updated {{ comment.updated_date }}</small></div>{%endif%}
                                 </div>
                             </div>
@@ -144,6 +144,9 @@
                 $(this).prev().prev().prev().replaceWith('<select class="form-select" name="ingredient_id" aria-label="Default select example"><option selected>Select ingredient</option>{%if allingredients%}{%for key, ingredient in allingredients%}<option value="{{key}}">{{ingredient.name}}</option>{%endfor%}{%endif%}</select>');
                 $(this).prev().prev().replaceWith('<label for="quantity" style="margin-right:10px; margin-top:10px;" class="form-label">Quantity: </label><input type="text" name="quantity">');
                 $("#submit-form").removeClass("invisible");
+
+                $(this).next().css("display","");
+                $(this).remove();
             });
 
             $(".convert2textbox").click(function() {
@@ -160,7 +163,8 @@
 
                 $(this).after('<input type="color" class="form-control form-control-color mb-3" id="exampleColorInput" name="color" value="#563d7c" title="Choose your color">');
 
-                $(this).after('<div class="w-100 mt-1"><input type="text" class="form-text" name="language" placeholder="Language"></div>');
+                var value = $(this).parent().children(".language-div").children().children().text();
+                $(this).after("<div class='w-100 mt-1'><input type='text' class='form-text' value='"+value+"' name='language' placeholder='Language'></div>");
 
                 var input2 = $("<input>", {value: $(this).attr("id"), type: "text", class: "invisible", name: "comment_id"});
                 $(this).after(input2);

@@ -7,6 +7,9 @@
 {% block content %}
 
 <div class="container" style="width:50%; margin-top:20px">
+  {%if not userMenus%}
+      <h1 class="display-4 mt-5">No user menus are found.</h1>
+  {%endif%}
   <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
 
     {%if userMenus%}
@@ -37,7 +40,7 @@
   </div>
 
   {%if user == owner%}
-  <div class="row row-cols-1 row-cols-sm-4 d-flex justify-content-center">
+  <div class="row row-cols-1 row-cols-sm-4 d-flex justify-content-center mt-5">
     <form action="/menu/add" method="POST" class="signin-form">
         <div class="form-group me-2 mt-2">
           <button type="submit" name="addMenu" value="addPage" class="form-control btn btn-dark submit px-3">

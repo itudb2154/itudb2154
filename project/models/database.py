@@ -180,13 +180,13 @@ class Database:
     def getUser(self, userId):
         with psycopg2.connect(self.conn, sslmode='require') as connection:
             cursor = connection.cursor()
-            query = 'select "user".id, "user".name, "user".surname, "user".mail, "user".password, "user".age, country.name from "user" JOIN country ON ("user".country_id = country.id) where ("user".id = %s);'
+            query = 'select "user".id, "user".name, "user".surname, "user".mail, "user".password, "user".age, country.name, "user".role_id from "user" JOIN country ON ("user".country_id = country.id) where ("user".id = %s);'
             
             cursor.execute(query, [userId])
             connection.commit()
             userDb = cursor.fetchone()
             
-            user = User(userDb[0], userDb[1], userDb[2], userDb[3], userDb[4], userDb[5], userDb[6])
+            user = User(userDb[0], userDb[1], userDb[2], userDb[3], userDb[4], userDb[5], userDb[6], userDb[7])
             return user
 
     def addComment(self, comment):
@@ -231,13 +231,13 @@ class Database:
             cursor.execute(query, arr)
             connection.commit()
 
-            query = 'select "user".id, "user".name, "user".surname, "user".mail, "user".password, "user".age, country.name from "user" JOIN country ON ("user".country_id = country.id) where ("user".id = %s);'
+            query = 'select "user".id, "user".name, "user".surname, "user".mail, "user".password, "user".age, country.name, "user".role_id from "user" JOIN country ON ("user".country_id = country.id) where ("user".id = %s);'
             
             cursor.execute(query, [userId])
             connection.commit()
             userDb = cursor.fetchone()
             
-            user = User(userDb[0], userDb[1], userDb[2], userDb[3], userDb[4], userDb[5], userDb[6])
+            user = User(userDb[0], userDb[1], userDb[2], userDb[3], userDb[4], userDb[5], userDb[6], userDb[7])
             return user
 
     def getAllCountries(self):
@@ -258,13 +258,13 @@ class Database:
         users = []
         with psycopg2.connect(self.conn, sslmode='require') as connection:
             cursor = connection.cursor()
-            query = 'select id, name, surname, mail, password, age, country_id FROM "user" ORDER BY id ASC;'
+            query = 'select id, name, surname, mail, password, age, country_id, role_id FROM "user" ORDER BY id ASC;'
             cursor.execute(query)
             connection.commit()
             usersDb = cursor.fetchall()
 
-            for userId, name, surname, mail, password, age, countryId in usersDb:
-                user = User(userId, name, surname, mail, password, age, countryId) 
+            for userId, name, surname, mail, password, age, countryId, role_id in usersDb:
+                user = User(userId, name, surname, mail, password, age, countryId, role_id) 
                 users.append((userId, user))
             return users
 

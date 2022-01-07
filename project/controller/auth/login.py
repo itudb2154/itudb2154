@@ -57,9 +57,22 @@ def login_required(func):
     return wrapper
 #session wrap done
 
+def admin_required(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        role_id = session.get("role_id")
+        if role_id == 1:
+            return func(*args, **kwargs)
+            
+        else:
+            return redirect("/")
+    return wrapper
+#session wrap done
+
 
 @app.route('/login', methods = ['GET', 'POST'])
 def login():
+    role_id = session.get("role_id")
     if session.get("id"):
         return redirect("/")
 
@@ -78,19 +91,21 @@ def login():
         #crpytion complete
 
         #db selection test
-        cursor.execute('''SELECT id FROM "user" where mail='%s' and password='%s';''' % (request.form['email'], hash))
+        cursor.execute('''SELECT id, role_id FROM "user" where mail='%s' and password='%s';''' % (request.form['email'], hash))
         response = cursor.fetchone()
  
         if response == None:
             error = True
         else:
             session["id"] = response[0]
+            session["role_id"] = response[1]
             return redirect("/")
 
-    return render_template('login.html', error=error)
+    return render_template('login.html', error=error, role_id=role_id)
 
 @app.route('/register', methods = ['GET', 'POST'])
 def register():
+    role_id = session.get("role_id")
     countries = db.getAllCountries();
     if session.get("id"):
         return redirect("/")
@@ -116,21 +131,23 @@ def register():
         
         connection.commit()
 
-        return render_template('register.html', success=True),  {"Refresh": "2; url=/login"}
+        return render_template('register.html', success=True, role_id=role_id),  {"Refresh": "2; url=/login"}
 
-    return render_template('register.html', countries=countries)
+    return render_template('register.html', countries=countries, role_id=role_id)
 
 
 @app.route('/', methods = ['GET', 'POST'])
 def index():
+    role_id = session.get("role_id")
     recipes = db.getRecipes(-1)
     user = session.get("id")
 
-    return render_template('index.html', recipes=recipes, user=user)
+    return render_template('index.html', recipes=recipes, user=user, role_id=role_id)
 
 @app.route('/menus/<int:ownerId>', methods = ['GET', 'POST'])
 @login_required
 def menus(ownerId):
+    role_id = session.get("role_id")
     owner = ownerId
     user = session.get("id")
     userMenus = db.getUserMenus(owner)
@@ -158,12 +175,13 @@ def menus(ownerId):
            menu.created_date = str(seconds) + " seconds ago"
            continue
 
-    return render_template('menus.html', user=user, userMenus=userMenus, owner=owner)
+    return render_template('menus.html', user=user, userMenus=userMenus, owner=owner, role_id=role_id)
 
     
 @app.route('/logout', methods = ['GET', 'POST'])
 @login_required
 def logout():
+    role_id = session.get("role_id")
     if session.get("id"):
         session["id"] = None
         
@@ -172,6 +190,7 @@ def logout():
 @app.route('/addrecipe', methods = ['GET', 'POST'])
 @login_required
 def addrecipe():
+    role_id = session.get("role_id")
     if request.method == 'POST':
         #assuming the recipe is given correctly
         print(request.form['meal'])
@@ -188,12 +207,13 @@ def addrecipe():
     meals = db.get_meals()
     ingredients = db.getIngredients()
 
-    return render_template('addrecipe.html', meals=meals, ingredients=ingredients, user=session.get("id"))
+    return render_template('addrecipe.html', meals=meals, ingredients=ingredients, user=session.get("id"), role_id=role_id)
 
 
 @app.route('/menu/add', methods = ['GET', 'POST'])
 @login_required
 def addMenu():
+    role_id = session.get("role_id")
     if request.method == 'POST':
         if request.form['addMenu'] == "insertValue":
             menuTitle = request.form['title']
@@ -213,11 +233,12 @@ def addMenu():
 
         elif request.form['addMenu'] == "addPage":
             meals = db.get_meals()
-            return render_template('addmenu.html', meals=meals, user=session.get("id"))
+            return render_template('addmenu.html', meals=meals, user=session.get("id"), role_id=role_id)
 
 @app.route('/user/<int:ownerId>/recipes', methods = ['GET', 'POST'])
 @login_required
 def recipes(ownerId):
+    role_id = session.get("role_id")
     recipes = db.getRecipes(ownerId) #show the recipes of the owner, not user
 
     if request.method == 'POST':
@@ -229,11 +250,12 @@ def recipes(ownerId):
     #if session.get("id") == ownerId:
         #owner = True    #if i am the owner, i can change this page
 
-    return render_template('recipes.html', recipes=recipes, user=user, owner=owner)
+    return render_template('recipes.html', recipes=recipes, user=user, owner=owner, role_id=role_id)
 
 @app.route('/recipe/<int:recipeId>/addIng', methods = ['GET', 'POST'])
 @login_required
 def addIng(recipeId):
+    role_id = session.get("role_id")
     user = session.get("id")
     recipe = db.getRecipe(recipeId)
     owner = recipe[1].user_id
@@ -246,11 +268,12 @@ def addIng(recipeId):
         url = "/recipe/" + str(recipeId)
         return redirect(url)
         
-    return render_template('addIngredient.html', allingredients=allingredients, user=user, owner=owner)
+    return render_template('addIngredient.html', allingredients=allingredients, user=user, owner=owner, role_id=role_id)
 
 @app.route('/menu/<int:menuId>/addMeal', methods = ['GET', 'POST'])
 @login_required
 def addMeal(menuId):
+    role_id = session.get("role_id")
     user = session.get("id")
     owner = db.getMenuOwner(menuId)
 
@@ -262,11 +285,12 @@ def addMeal(menuId):
         url = "/menu/" + str(menuId)
         return redirect(url)
 
-    return render_template('addMeal.html', allMeals=allMeals, user=user, owner=owner)
+    return render_template('addMeal.html', allMeals=allMeals, user=user, owner=owner, role_id=role_id)
 
 @app.route('/recipe/<int:recipeId>', methods = ['GET', 'POST'])	
 @login_required	
 def recipe(recipeId):	
+    role_id = session.get("role_id")
     	
     user=session.get("id")	
     comments = db.getComments(recipeId)	
@@ -354,11 +378,12 @@ def recipe(recipeId):
                 url = "/recipe/" + str(recipeId)	
                 return redirect(url)	
             	
-    return render_template('recipe.html', recipe=recipe, ingredients=ingredients, user=user, owner=owner, comments=comments, allingredients=allingredients)
+    return render_template('recipe.html', recipe=recipe, ingredients=ingredients, user=user, owner=owner, comments=comments, allingredients=allingredients, role_id=role_id)
 
 @app.route('/menu/<int:menuId>', methods = ['GET', 'POST'])
 @login_required
 def menu(menuId):
+    role_id = session.get("role_id")
     owner = db.getMenuOwner(menuId)
     user=session.get("id")
 
@@ -369,7 +394,7 @@ def menu(menuId):
     if request.method == 'POST':
         if request.form.get('button') == "view":
             #only show contents, dont edit
-            return render_template("menu.html", menu=menu, user=user, owner=owner, meals=meals, allMeals=allMeals)
+            return render_template("menu.html", menu=menu, user=user, owner=owner, meals=meals, allMeals=allMeals, role_id=role_id)
 
         elif request.form.get('button') == "updateMeal":
 
@@ -411,10 +436,11 @@ def menu(menuId):
                 url = "/menu/" + str(menuId)
                 return redirect(url)
 
-    return render_template('menu.html', menu=menu, user=user, owner=owner, meals=meals, allMeals=allMeals)
+    return render_template('menu.html', menu=menu, user=user, owner=owner, meals=meals, allMeals=allMeals, role_id=role_id)
 
 @app.route('/user/<int:userId>', methods = ['GET', 'POST'])
 def user(userId):
+    role_id = session.get("role_id")
     user = session.get("id")      #current user in the session
     owner = db.getUser(userId)  #owner of the current page
 
@@ -432,13 +458,15 @@ def user(userId):
     countries = db.getAllCountries()
     
 
-    return render_template("user.html", user=user, owner=owner, isOwner=isOwner, countries=countries)
+    return render_template("user.html", user=user, owner=owner, isOwner=isOwner, countries=countries, role_id=role_id)
 
 
 @app.route('/adminPanel', methods = ['GET', 'POST'])
 @login_required
+@admin_required
 def admin():
-    userid = session.get("id")      #current user in the session
+    userid = session.get("id")
+    role_id = session.get("role_id")
     
     if request.method == 'POST' and request.form.get('delete-user'):
         id2delete = request.form['delete-user']
@@ -461,19 +489,19 @@ def admin():
 
     if edit != None and edit.lower() == 'meal' and meal != None:
         editMeal = db.getMealbyId(meal)
-        countries = db.getAllCountries();
-        categories = db.getAllCategories();
-        return render_template("editMealPage.html", user=userid, editMeal=editMeal, countries=countries, categories=categories, mealid=meal)
+        countries = db.getAllCountries()
+        categories = db.getAllCategories()
+        return render_template("editMealPage.html", user=userid, editMeal=editMeal, countries=countries, categories=categories, mealid=meal, role_id=role_id)
 
 
     if user != None and user.lower() == "true" :
         allUsers = db.getAllUsers()
-        return render_template("adminPanel.html", user=userid, allUsers=allUsers, userSelected=True)
+        return render_template("adminPanel.html", user=userid, allUsers=allUsers, userSelected=True, role_id=role_id)
     if meal != None and meal.lower() == "true" :
         allMeals = db.get_meals()
-        return render_template("adminPanel.html", user=userid, allMeals=allMeals, mealSelected=True)
+        return render_template("adminPanel.html", user=userid, allMeals=allMeals, mealSelected=True, role_id=role_id)
     
-    return render_template("adminPanel.html", user=userid)
+    return render_template("adminPanel.html", user=userid, role_id=role_id)
 
     
 

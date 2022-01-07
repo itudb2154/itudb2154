@@ -37,6 +37,7 @@
               <li><a href="/user/{{ user }}/recipes" class="nav-link px-2 text-white">My Recipes</a></li>
               <li><a href="/user/{{ user }}" class="nav-link px-2 text-white">My Profile</a></li>
               {%endif%}
+              {%if role_id == 1%}<a href="/adminPanel" class="nav-link px-2 text-white">Admin Panel</a>{%endif%}
             </ul>
     
             <form class="col-12 col-lg-auto mb-3 mb-lg-0 me-lg-3">

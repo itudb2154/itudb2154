@@ -74,7 +74,7 @@
                                     {%if user==owner%}
                                     <button type="button" class="btn btn-outline-secondary dropdown-meals">Edit</button>
                                     <input type="text" name="menu_content_id" value="{{key}}" style="display:none">
-                                    <button type="submit" name="button" class="btn btn-outline-primary update-btn" id="{{key}}" value="updateMeal">Update</button>
+                                    <button type="submit" style="display:none;"name="button" class="btn btn-outline-primary update-btn" id="{{key}}" value="updateMeal">Update</button>
                                     <button type="submit" name="button" class="btn btn-outline-danger" value="deleteMeal" id="{{key}}">Delete</button>
                                     {%endif%}
                                 </div>
@@ -103,6 +103,9 @@
             $(".dropdown-meals").click(function() {
                 $(this).prev().prev().replaceWith('<select class="form-select mb-2 mt-3" name="meal_id" aria-label="Default select example"><option selected>Select a meal from the dropdown</option>{%if allMeals %}{%for key, meal in allMeals %}<option value="{{key}}">{{meal.name}}</option>{%endfor%}{%endif%}</select>');
                 $(this).prev().remove();
+
+                $(this).next().next().css("display","");
+
                 $(this).remove();
             });
 
