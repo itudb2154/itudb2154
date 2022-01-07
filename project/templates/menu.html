@@ -9,15 +9,55 @@
         <div class="py-5 bg-light">
             <div class="container">
                 <div class="justify-content-center">
-                    <img src="{{ meals[0][1].photo_url }}" class="w-25" height="325">
+                    <img src="http://orlysrestaurant.com/wp-content/uploads/2015/10/xmas-lunch.jpg" class="w-25" height="325">
                     <div class="float-end" style="width:70%">
-                        <h1 class="display-3">{{ menu[1].title }}</h1>
-                        <h3 class="display-6">Description</h3>
+                        <form method="POST" class="signin-form">
+                        <h1 class="display-3">{{ menu[1].title }}
+                            {%if user==owner%}
+                                <button type="button" id="title" class="btn btn-secondary convert2input">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil" viewBox="0 0 17 17">
+                                    <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"></path>
+                                    </svg>
+                                </button>
+                            {% endif %}
+                        </h1>
                         
-                        <div class="mt-5">
-                            <p>{{ menu[1].description }}</p>
+                        <h6>Description:</h6>
+                        <div>
+                            <p>{{ menu[1].description }} &nbsp;
+                                {%if user==owner%}
+                                <button type="button" id="description" class="btn btn-secondary convert2input">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil" viewBox="0 0 17 17">
+                                    <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"></path>
+                                    </svg>
+                                </button>
+                                {% endif %}
+                            </p>
                         </div>
+                        <h6>Notes:</h6>
+                        <div>
+                            <p>{{ menu[1].notes }} &nbsp;
+                                {%if user==owner%}
+                                <button type="button" id="notes" class="btn btn-secondary convert2input">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil" viewBox="0 0 17 17">
+                                    <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"></path>
+                                    </svg>
+                                </button>
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="row row-cols-1 row-cols-sm-4 d-flex justify-content-left" >
+                        
+                            <div class="form-group me-2 mt-2">
+                                <button type="submit" name="button" id="submit-form" value="submit-change" class="form-control btn btn-primary submit px-3 invisible">
+                                    Save Changes
+                                </button>
+                            </div>
+                        </div>
+                        </form>
                     </div>
+                    
+                    
                     <div>
                         <div class="text-center">
                             <h1 class="display-3">Meals</h1>
@@ -26,46 +66,57 @@
                         {%if meals%}
                         {%for key, meal in meals%}
                         <div class="card col-sm-3">
-                            <div class="card-body">
-                              <h5 class="card-title">{{ meal.name }}</h5>
-                              <p class="card-text"><b>Category</b><span style="margin-left:5px;" class="convert2input">{{ meal.category_name }}</span> </p>
-                              {%if user==owner%}
-                              <button type="button" class="btn btn-outline-secondary" id={{}}>Edit</button>
-                              <button type="button" class="btn btn-outline-danger">Delete</button>
-                              {%endif%}
-                            </div>
+                            <form method="POST">
+                                <div class="card-body">
+                                    
+                                    <h5 class="card-title">{{ meal.name }}</h5>
+                                    <p class="card-text"><b>Category</b><span style="margin-left:5px;" >{{ meal.category_name }}</span> </p>
+                                    {%if user==owner%}
+                                    <button type="button" class="btn btn-outline-secondary dropdown-meals">Edit</button>
+                                    <input type="text" name="menu_content_id" value="{{key}}" style="display:none">
+                                    <button type="submit" name="button" class="btn btn-outline-primary update-btn" id="{{key}}" value="updateMeal">Update</button>
+                                    <button type="submit" name="button" class="btn btn-outline-danger" value="deleteMeal" id="{{key}}">Delete</button>
+                                    {%endif%}
+                                </div>
+                            </form>
                         </div>
                         {%endfor%}
                         {%endif%}
                         </div>
                     </div>
-
-
+                    <div class="row row-cols-1 row-cols-sm-4 d-flex justify-content-center">
+                        <form method="POST" class="signin-form" action="/menu/{{menu[0]}}/addMeal">
+                            <div class="form-group me-2 mt-2">
+                            <button type="submit" name="button" value="addIngredient" class="form-control btn btn-dark submit px-3">
+                                Add Meal
+                            </button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    
                 </div>            
             </div>
         </div>
         <script>
-            $(".convert2input").click(function() {
-                var input = $("<input>", { val: $(this).prev().text(),
-                                           type: "text",
-                                           name: $(this).attr("id")});
-                $(this).prev().replaceWith(input);
-                $(this).prev().addClass("d-inline card-text mb-2");
-    
-                //$(this).prev().attr("name", $(this).attr("id"));
-    
+       
+            $(".dropdown-meals").click(function() {
+                $(this).prev().prev().replaceWith('<select class="form-select mb-2 mt-3" name="meal_id" aria-label="Default select example"><option selected>Select a meal from the dropdown</option>{%if allMeals %}{%for key, meal in allMeals %}<option value="{{key}}">{{meal.name}}</option>{%endfor%}{%endif%}</select>');
+                $(this).prev().remove();
                 $(this).remove();
-    
+            });
+
+            $(".convert2input").click(function() {
+                var input = $("<input>", { val: $(this).parent().text().trim(),
+                                        type: "text",
+                                        name: $(this).attr("id")});
+                var cloneBtn = $(this);
+                $(this).parent().replaceWith(input);
+                $(this).parent().addClass("d-inline card-text mb-2");
+
                 $("#submit-form").removeClass("invisible");
                     
                 input.select();
-            });
-    
-            //for the dropdown countries menu
-            $(".dropdown-countries").click(function() {
-                $(this).prev().replaceWith('<select class="form-select" name="country_id" aria-label="Default select example"><option selected>Select a country from the dropdown</option>{%if countries%}{%for key, country in countries%}<option value="{{key}}">{{country.name}}</option>{%endfor%}{%endif%}</select>');
-                $(this).remove();
-                $("#submit-form").removeClass("invisible");
             });
             </script>
 {% endblock %}

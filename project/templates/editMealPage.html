@@ -1,0 +1,50 @@
+{% extends 'layout.html' %}
+
+{% block head_ext %}
+    <title>Edit Meal</title>
+{% endblock head_ext %}
+
+{% block content %}
+{%if editMeal%}
+    <div class="container" style="width:50%">
+        <form action="/adminPanel" method="POST" class="signin-form mt-5">
+
+            <input style="display: none;" type="text" name="key" class="form-control" placeholder="Name" value="{{mealid}}" required="">
+
+            <div class="form-group mb-3">
+                <label class="label" for="name">Name</label>
+                <input type="text" name="name" class="form-control" placeholder="Name" value="{{editMeal.name}}" required="">
+            </div>
+            <div class="form-group mb-3">
+                <label class="label" for="photo_url">Photo Url</label>
+                <input type="text" name="photo_url" class="form-control" value="{{editMeal.photo_url}}" placeholder="Photo Url" required="">
+            </div>
+            <div class="form-group mb-3">
+                <label class="label" for="coisine_name">Cousine Name</label>
+                <input type="text" name="coisine_name" class="form-control" value="{{editMeal.cousine_name}}" placeholder="Coisine Name" required="">
+            </div>
+            <label class="label" for="country_name">Country Name</label>
+            <select class="form-select" name="country_name" aria-label="Default select example">
+            {%if countries%}
+            {%for key, country in countries%}
+                {%if country.name == editMeal.country_name%} <option selected value="{{key}}">{{country.name}} </option> {%endif%}
+                {%if country.name != editMeal.country_name%} <option value="{{key}}">{{country.name}} </option> {%endif%}
+            {%endfor%}
+            {%endif%}
+            </select>
+            <label class="label" for="category_name">Category Name</label>
+            <select class="form-select" name="category_name" aria-label="Default select example">
+            {%if categories%}
+            {%for key, category in categories%}
+                {%if category.name == editMeal.category_name%} <option selected value="{{key}}">{{category.name}} </option> {%endif%}
+                {%if category.name != editMeal.category_name%} <option value="{{key}}">{{category.name}} </option> {%endif%}
+            {%endfor%}
+            {%endif%}
+            </select>
+            <div class="form-group">
+                <button type="submit" name="button" value="update" class="form-control btn btn-dark submit px-3">Save Changes</button>
+            </div>
+        </form>
+    </div>
+{%endif%}
+{% endblock %}

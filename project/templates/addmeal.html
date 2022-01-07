@@ -1,0 +1,43 @@
+{% extends 'layout.html' %}
+
+{% block head_ext %}
+    <title>Add Meal to Menu</title>
+{% endblock head_ext %}
+
+{% block content %}
+
+      <div class="container" style="width:25%">
+        <form method="POST" class="signin-form mt-5">
+            <div class="border border-dark p-3">
+              <div class="ingredient border border-dark p-2 m-2">
+                <select class="form-select" name="meals" aria-label="Default select example">
+                  <option selected>Select a meal from the dropdown</option>
+                  {%if allMeals %}
+                  {%for key, meal in allMeals%}
+                  <option value="{{meal.name}}">{{meal.name}}</option>
+                  {%endfor%}
+                  {%endif%}
+                </select>
+              </div>
+              
+              <div class="form-group me-2 mt-2">
+                <button type="button" id="addMeal" class="form-control btn btn-dark submit px-3">
+                  Add more meal
+                </button>
+              </div>
+            </div>
+            <div class="form-group">
+                <button type="submit" name="button" value="add" class="form-control btn btn-dark submit px-3">Save Changes</button>
+            </div>
+            </form>
+      </div>
+    <script>
+      document.getElementById("addMeal").onclick = function() {
+        var container = document.querySelectorAll('.ingredient');
+        var section = document.querySelector('.ingredient');
+        var last = container[container.length-1];
+        section.parentNode.insertBefore(section.cloneNode(true), last.nextSibling);
+        
+      }
+    </script>
+{% endblock %}

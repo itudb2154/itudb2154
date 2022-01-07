@@ -19,11 +19,10 @@
             <p class="card-text"> {{menu.title}} </p>
             <div class="d-flex justify-content-between align-items-center">
               <div class="btn-group">
-                <form action="/menus/{{ owner }}/menu/{{ key }}" method="POST">
+                <form action="/menu/{{ key }}" method="POST">
                   <button type="submit" name="button" value="view" class="btn btn-sm btn-outline-secondary">View</button>
                   {%if owner == user%}
-                  <button type="submit" name="button" value="edit" class="btn btn-sm btn-outline-secondary">Edit</button>
-                  <button type="submit" name="button" value="delete" class="btn btn-sm btn-outline-danger">Delete</button>
+                  <button type="submit" name="button" value="deleteMenu" class="btn btn-sm btn-outline-danger">Delete</button>
                   {%endif%}
                 </form>
               </div>
@@ -39,7 +38,7 @@
 
   {%if user == owner%}
   <div class="row row-cols-1 row-cols-sm-4 d-flex justify-content-center">
-    <form action="/menus/add" method="POST" class="signin-form">
+    <form action="/menu/add" method="POST" class="signin-form">
         <div class="form-group me-2 mt-2">
           <button type="submit" name="addMenu" value="addPage" class="form-control btn btn-dark submit px-3">
             Add menu

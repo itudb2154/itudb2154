@@ -22,6 +22,29 @@ cursor = connection.cursor()
 from functools import wraps
 from flask import flash
 
+def calculateTime(myDict):	
+    dateNow = int(time.time())	
+    for key, comment in myDict:	
+        if comment.updated_date != None:	
+            timePast = dateNow - comment.updated_date	
+            days = timePast // 86400	
+            hours = timePast // 3600 % 24	
+            minutes = timePast // 60 % 60	
+            seconds = timePast % 60	
+            if days:	
+                comment.updated_date = str(days) + " days ago"	
+                continue	
+            if hours:	
+                comment.updated_date = str(hours) + " hours ago"	
+                continue	
+            if minutes:	
+                comment.updated_date = str(minutes) + " minutes ago"	
+                continue	
+            if seconds:	
+                comment.updated_date = str(seconds) + " seconds ago"	
+                continue
+
+
 def login_required(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
@@ -111,6 +134,7 @@ def menus(ownerId):
     owner = ownerId
     user = session.get("id")
     userMenus = db.getUserMenus(owner)
+
     dateNow = int(time.time())
 
     for key, menu in userMenus:
@@ -167,7 +191,7 @@ def addrecipe():
     return render_template('addrecipe.html', meals=meals, ingredients=ingredients, user=session.get("id"))
 
 
-@app.route('/menus/add', methods = ['GET', 'POST'])
+@app.route('/menu/add', methods = ['GET', 'POST'])
 @login_required
 def addMenu():
     if request.method == 'POST':
@@ -214,98 +238,180 @@ def addIng(recipeId):
     recipe = db.getRecipe(recipeId)
     owner = recipe[1].user_id
     allingredients = db.getIngredients()
+
     if request.method == 'POST' and user==owner and request.form['button'] == "add":
         ingredients = request.form.getlist('ingredient')
         measures = request.form.getlist('measure')
         db.addRecipeIngredient(ingredients, measures, recipeId)
         url = "/recipe/" + str(recipeId)
         return redirect(url)
+        
     return render_template('addIngredient.html', allingredients=allingredients, user=user, owner=owner)
 
-@app.route('/recipe/<int:recipeId>', methods = ['GET', 'POST'])
+@app.route('/menu/<int:menuId>/addMeal', methods = ['GET', 'POST'])
 @login_required
-def recipe(recipeId):
-    
-    user=session.get("id")
-    comments = db.getComments(recipeId)
-    recipe = db.getRecipe(recipeId)
-    ingredients = db.getIngredientsOfARecipe(recipeId)
-    owner = recipe[1].user_id
-    allingredients = db.getIngredients()
+def addMeal(menuId):
+    user = session.get("id")
+    owner = db.getMenuOwner(menuId)
 
-    if request.method == 'POST':
-        if request.form['button'] == "deleteRecipe":
-            if user==owner:
-                db.deleteRecipe(recipeId)
-                url = "/user/" + str(owner) + "/recipes"
-                return redirect(url)
-            return
+    allMeals = db.get_meals()
 
-        elif request.form['button'] == "deleteIng":
-            if user==owner:
-                for key, value in request.form.items():
-                    if(value != "deleteIng"):
-                        print(key, value)
-                        db.deleteIngredient(value)
+    if request.method == 'POST' and user==owner and request.form['button'] == "add":
+        meals = request.form.getlist('meals')
+        db.addUserMenuMeals(meals, menuId)
+        url = "/menu/" + str(menuId)
+        return redirect(url)
 
-                url = "/recipe/" + str(recipeId)
-                return redirect(url)
-            return
+    return render_template('addMeal.html', allMeals=allMeals, user=user, owner=owner)
 
-        elif request.form['button'] == "updateIng":
-            if user==owner:
-                myDict = []
-                for key, value in request.form.items():
-                    if(value != "updateIng"):
-                        myDict.append((key, value))
-                
-                db.updateIngredientOfMeals(myDict)
-
-                url = "/recipe/" + str(recipeId)
-                return redirect(url)
-                
-
-            return 
-
-        elif request.form['button'] == "comment":
-            #the user in the session is making a comment
-            comment = Comment(user, recipeId, request.form['message'], datetime.datetime.now(), None, request.form['color'], None, None)
-            db.addComment(comment)
-
-            comments = db.getComments(recipeId) #get new comments
-
-            return render_template('recipe.html', recipe=recipe, ingredients=ingredients, user=user, owner=owner, comments=comments)
-
+@app.route('/recipe/<int:recipeId>', methods = ['GET', 'POST'])	
+@login_required	
+def recipe(recipeId):	
+    	
+    user=session.get("id")	
+    comments = db.getComments(recipeId)	
+    recipe = db.getRecipe(recipeId)	
+    ingredients = db.getIngredientsOfARecipe(recipeId)	
+    owner = recipe[1].user_id	
+    allingredients = db.getIngredients()	
+    #change the created date 	
+    dateNow = int(time.time())	
+    for key, comment in comments:	
+        timePast = dateNow - comment.created_date	
+        days = timePast // 86400	
+        hours = timePast // 3600 % 24	
+        minutes = timePast // 60 % 60	
+        seconds = timePast % 60	
+        if days:	
+            comment.created_date = str(days) + " days ago"	
+            continue	
+        if hours:	
+            comment.created_date = str(hours) + " hours ago"	
+            continue	
+        if minutes:	
+            comment.created_date = str(minutes) + " minutes ago"	
+            continue	
+        if seconds:	
+            comment.created_date = str(seconds) + " seconds ago"	
+            continue	
+    calculateTime(comments)	
+    #change the created date completed	
+    if request.method == 'POST':	
+        if request.form['button'] == "deleteRecipe":	
+            if user==owner:	
+                db.deleteRecipe(recipeId)	
+                url = "/user/" + str(owner) + "/recipes"	
+                return redirect(url)	
+            return	
+        elif request.form['button'] == "deleteIng":	
+            if user==owner:	
+                for key, value in request.form.items():	
+                    if(value != "deleteIng"):	
+                        db.deleteIngredient(value)	
+                url = "/recipe/" + str(recipeId)	
+                return redirect(url)	
+            return	
+        elif request.form['button'] == "updateIng":	
+            if user==owner:	
+                myDict = []	
+                for key, value in request.form.items():	
+                    if(value != "updateIng"):	
+                        myDict.append((key, value))	
+                	
+                db.updateIngredientOfMeals(myDict)	
+                url = "/recipe/" + str(recipeId)	
+                return redirect(url)	
+                	
+            return 	
+        elif request.form['button'] == "comment":	
+            #the user in the session is making a comment	
+            #created date 	
+            dateNow = int(time.time())	
+            #created date done	
+            comment = Comment(user, recipeId, request.form['message'], dateNow, None, request.form['color'], request.form['language'], None)	
+            db.addComment(comment)	
+            comments = db.getComments(recipeId) #get new comments	
+            url = "/recipe/" + str(recipeId)	
+            return redirect(url)	
+        elif request.form['button'] == "updateComment":	
+            #the user in the session is updating a comment	
+            comment = db.getComment(request.form['comment_id'])	
+            if user==comment[0][1].user_id:	
+                myDict = []	
+                for key, value in request.form.items():	
+                    if(value != "updateComment"):	
+                        myDict.append((key, value))	
+                	
+                dateNow = int(time.time())	
+                myDict.append(("updated_date", dateNow))	
+                db.updateComment(myDict)	
+                url = "/recipe/" + str(recipeId)	
+                return redirect(url)	
+        elif request.form['button'] == "delete-comment":	
+            comment = db.getComment(request.form['comment_id'])	
+            if user==comment[0][1].user_id:	
+                db.deleteComment(request.form['id2delete'])	
+                url = "/recipe/" + str(recipeId)	
+                return redirect(url)	
+            	
     return render_template('recipe.html', recipe=recipe, ingredients=ingredients, user=user, owner=owner, comments=comments, allingredients=allingredients)
 
-@app.route('/menus/<int:ownerId>/menu/<int:menuId>', methods = ['GET', 'POST'])
+@app.route('/menu/<int:menuId>', methods = ['GET', 'POST'])
 @login_required
-def menu(ownerId, menuId):
-    owner = ownerId
+def menu(menuId):
+    owner = db.getMenuOwner(menuId)
     user=session.get("id")
 
     menu = db.getMenu(menuId)
     meals = db.getMenuContents(menuId)
+    allMeals = db.get_meals()
 
     if request.method == 'POST':
         if request.form.get('button') == "view":
             #only show contents, dont edit
-            return render_template("menu.html", menu=menu, user=user, owner=owner, meals=meals)
+            return render_template("menu.html", menu=menu, user=user, owner=owner, meals=meals, allMeals=allMeals)
 
-        elif request.form.get('button') == "edit":
+        elif request.form.get('button') == "updateMeal":
+
             if user==owner:
-                return render_template("menu.html", menu=menu, user=user, owner=owner, meals=meals)
-            return
+                myDict = []
+                for key, value in request.form.items():
+                    if(value != "updateMeal"):
+                        myDict.append((key, value))
 
-        elif request.form.get('button') == "delete":
+                db.updateMenuContent(myDict)
+
+                url = "/menu/" + str(menuId)
+                return redirect(url)
+
+        elif request.form.get('button') == "deleteMeal":
+
+            if user==owner:
+                for key, value in request.form.items():
+                    if(value != "deleteMeal"):
+                        db.deleteMenuContent(value)
+
+                url = "/menu/" + str(menuId)
+                return redirect(url)
+
+        elif request.form.get('button') == "deleteMenu":
             if user==owner:
                 db.deleteUserMenu(menuId)
-                return render_template("menu.html", menu=menu, user=user, owner=owner, meals=meals)
-            return
+                url = "/menus/" + str(owner)
+                return redirect(url)
+        
+        elif request.form.get('button') == "submit-change":
+            if user==owner:
+                myDict = []
+                for key, value in request.form.items():
+                    if(value != "submit-change"):
+                        myDict.append((key, value))
 
-    return render_template('menu.html', menu=menu, user=user, owner=owner, meals=meals)
+                db.updateUserMenu(myDict, menuId)
+                url = "/menu/" + str(menuId)
+                return redirect(url)
 
-#My profile should be created.
+    return render_template('menu.html', menu=menu, user=user, owner=owner, meals=meals, allMeals=allMeals)
 
 @app.route('/user/<int:userId>', methods = ['GET', 'POST'])
 def user(userId):
@@ -332,14 +438,42 @@ def user(userId):
 @app.route('/adminPanel', methods = ['GET', 'POST'])
 @login_required
 def admin():
-    user = session.get("id")      #current user in the session
-
+    userid = session.get("id")      #current user in the session
+    
     if request.method == 'POST' and request.form.get('delete-user'):
         id2delete = request.form['delete-user']
-        print(id2delete)
         db.deleteUser(id2delete)
+        return redirect("/adminPanel?user=true")
 
-    allUsers = db.getAllUsers()
+    elif request.method == 'POST' and request.form.get('delete-meal'):
+        id2delete = request.form['delete-meal']
+        db.deleteMeal(id2delete)
+        return redirect("/adminPanel?meal=true")
+    
+    elif request.method == 'POST' and request.form.get('button') == "update":
+        db.updateMeal(request.form['key'],request.form['name'], request.form['photo_url'], request.form['coisine_name'], request.form['country_name'], request.form['category_name'])
+        return redirect("/adminPanel?meal=true")
 
-    return render_template("adminPanel.html", user=user, allUsers=allUsers)
+    user = request.args.get('user')
+    meal = request.args.get('meal')
+
+    edit = request.args.get('edit')
+
+    if edit != None and edit.lower() == 'meal' and meal != None:
+        editMeal = db.getMealbyId(meal)
+        countries = db.getAllCountries();
+        categories = db.getAllCategories();
+        return render_template("editMealPage.html", user=userid, editMeal=editMeal, countries=countries, categories=categories, mealid=meal)
+
+
+    if user != None and user.lower() == "true" :
+        allUsers = db.getAllUsers()
+        return render_template("adminPanel.html", user=userid, allUsers=allUsers, userSelected=True)
+    if meal != None and meal.lower() == "true" :
+        allMeals = db.get_meals()
+        return render_template("adminPanel.html", user=userid, allMeals=allMeals, mealSelected=True)
+    
+    return render_template("adminPanel.html", user=userid)
+
+    
 

@@ -23,7 +23,7 @@
                                     {% endif %}
                                 </div>
                                 <div class="mt-3">
-                                    <a href style="display:block; background-color: #DEE1E6; width: 140px; height:140px; border-radius: 50%;"><img style="padding:25px;" src="/static/img/profile.png" width="140" height="auto"></a>
+                                    <a href="/user/{{owner}}" style="display:block; background-color: #DEE1E6; width: 140px; height:140px; border-radius: 50%;"><img style="padding:25px;" src="/static/img/profile.png" width="140" height="auto"></a>
                                 </div>
                             </div>
                             
@@ -60,6 +60,7 @@
                             {%endfor%}
                             {%endif%}
                             </div>
+                            {%if user==owner%}
                             <div class="row row-cols-1 row-cols-sm-4 d-flex justify-content-center">
                                 <form method="POST" class="signin-form" action="/recipe/{{recipe[0]}}/addIng">
                                     <div class="form-group me-2 mt-2">
@@ -69,20 +70,27 @@
                                     </div>
                                 </form>
                             </div>
+                            {%endif%}
                         <div class="text-center mt-3">
                             <h1 class="display-3">Comments</h1>
                         </div>
 
                         {%if comments%}
                         {%for key, comment in comments%}
-                        <div class="card mb-3">
-                            <div class="card-body">
-                              <h5 class="card-title">{{ comment.user_name }}</h5>
-                              <p class="card-text" style="color:{{ comment.text_color }};">{{ comment.message }}</p>
-                              {%if user==comment.user_id%}<a href="#" class="btn btn-primary">Edit</a>{%endif%}
-                              <div class="mt-1"><small class="text-muted"> Created at {{ comment.created_date }}</small></div>
+                        <form method="POST" action="/recipe/{{comment.recipe_id}}">
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                <h5 class="card-title">{{ comment.user_name }}</h5>
+                                <p class="card-text" style="color:{{ comment.text_color }};">{{ comment.message }}</p>
+                                {%if user==comment.user_id%}<button type="button" class="btn btn-primary convert2textbox" id="{{key}}">Edit Comment</button>{%endif%}
+                                {%if user==comment.user_id%}<button type="submit" class="btn btn-danger" name="button" value="delete-comment">Delete Comment</button>{%endif%}
+                                {%if user==comment.user_id%}<input type="text" class="invisible" name="id2delete" value="{{key}}">{%endif%}
+                                <input value="{{key}}", type="text", class="invisible", name="comment_id">
+                                <div class="mt-1"><small class="text-muted"> Created {{ comment.created_date }}. Language is <span>{{ comment.language }}</span></small></div>
+                                {%if comment.updated_date%}<div class="mt-1"><small class="text-muted"> Updated {{ comment.updated_date }}</small></div>{%endif%}
+                                </div>
                             </div>
-                        </div>
+                        </form>
                         {%endfor%}
                         {%endif%}
 
@@ -104,7 +112,13 @@
                             <label class="form-label">You can pick a text color for your comment! (please do not choose light colors)</label>
                             <input type="color" class="form-control form-control-color mb-3" id="exampleColorInput" name="color" value="#563d7c" title="Choose your color">
                             
-                            <button type="submit" class="btn btn-dark" name="button" value="comment">Submit</button>
+                            <label class="form-label">Please enter the language of the comment</label>
+                            <div class="w-100">
+                                <input type="text" class="form-text" name="language" placeholder="Language">
+                            </div>
+                            
+
+                            <button type="submit" class="btn btn-dark mt-2" name="button" value="comment">Submit</button>
                         </form>
                     </div>
 
@@ -128,8 +142,32 @@
             });
             $(".dropdown-ingredient").click(function() {
                 $(this).prev().prev().prev().replaceWith('<select class="form-select" name="ingredient_id" aria-label="Default select example"><option selected>Select ingredient</option>{%if allingredients%}{%for key, ingredient in allingredients%}<option value="{{key}}">{{ingredient.name}}</option>{%endfor%}{%endif%}</select>');
-                $(this).prev().prev().replaceWith('<label for="quantity" style="margin-right:10px;" class="form-label">Quantity: </label><input type="text" name="quantity">');
+                $(this).prev().prev().replaceWith('<label for="quantity" style="margin-right:10px; margin-top:10px;" class="form-label">Quantity: </label><input type="text" name="quantity">');
                 $("#submit-form").removeClass("invisible");
+            });
+
+            $(".convert2textbox").click(function() {
+                var input = $("<textarea>", { val: $(this).prev().text(),
+                                        type: "text",
+                                        placeholder: "Comment",
+                                        name: "message"});
+                $(this).prev().replaceWith(input);
+                //$(this).prev().addClass("d-inline card-text mb-2");
+
+                //$(this).prev().attr("name", $(this).attr("id"));
+
+                $(this).after('<button type="submit" class="btn btn-dark" name="button" value="updateComment">Submit</button>');
+
+                $(this).after('<input type="color" class="form-control form-control-color mb-3" id="exampleColorInput" name="color" value="#563d7c" title="Choose your color">');
+
+                $(this).after('<div class="w-100 mt-1"><input type="text" class="form-text" name="language" placeholder="Language"></div>');
+
+                var input2 = $("<input>", {value: $(this).attr("id"), type: "text", class: "invisible", name: "comment_id"});
+                $(this).after(input2);
+
+                $(this).remove();
+
+                input.select();
             });
         </script>
 {% endblock %}
