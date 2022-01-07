@@ -3,5 +3,3 @@ ignore is updated
 login - signup operations are handled
 some session mechanism are added but better implementation will be done
 menus are handled, recipe mechanism has been changed, some css changes are done
-ingreadients, recipes crud operations are handled
-meal crud operations are handled, adminpanel is renewed
