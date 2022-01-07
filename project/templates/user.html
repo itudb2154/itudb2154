@@ -11,75 +11,70 @@
                 <div class="justify-content-start">
                     <div class="mt-1" style="width:100%">
                         <h1 class="display-3">Profile Page</h1>
-                        <h3 class="display-6">of <b>{{ owner.name }} {%if owner.surname!= None%}{{ owner.surname }} {% endif %}</b></h3>
-                        {%if owner.age!= None%}<h3 class="display-6">age <b>{{ owner.age }}</b></h3>{% endif %}
-                        {%if owner.country!= None%}<h3 class="display-6">country <b>{{ owner.country }}</b></h3>{% endif %}
-
                     </div>
 
-                    {%if isOwner%}
                     <div>
                         <div class="text-center">
-                            <h1 class="display-3">Your Creations</h1>
+                            <h1 class="display-3">{%if isOwner%}Your{% endif %} Creations</h1>
                         </div>
                         <div class="row">
                             <div class="col">
                                 <div class="card text-center">
                                     <div class="card-body">
-                                      <h5 class="card-title">Your Menus</h5>
-                                      <a href="/menus/{{ user }}" class="btn btn-primary">Menus</a>
+                                      <h5 class="card-title"> {%if isOwner%}Your{% endif %} Menus</h5>
+                                      <a href="/menus/{{ owner.id }}" class="btn btn-primary">Menus</a>
                                     </div>
                                 </div>
                             </div>
                             <div class="col">
                                 <div class="card text-center">
                                     <div class="card-body">
-                                      <h5 class="card-title">Your Recipes</h5>
-                                      <a href="/user/{{ user }}/recipes" class="btn btn-primary">Recipes</a>
+                                      <h5 class="card-title">{%if isOwner%}Your{% endif %} Recipes</h5>
+                                      <a href="/user/{{ owner.id }}/recipes" class="btn btn-primary">Recipes</a>
                                     </div>
                                 </div>
                             </div>
                         </div>
-
+                        {%if isOwner%}
                         <div class="text-center">
                             <h1 class="display-3">Settings</h1>
                         </div>
-
+                        {% endif %}
                         <div>
-                            <form action="/user/{{user}}" method="POST">
+                            <form action="/user/{{owner.id}}" method="POST">
                                 <div class="card text-center">
                                     <div class="card-body">
                                     <h5 class="card-title">Name</h5>
                                     <p class="card-text">{{ owner.name }}</p>
-                                    <button type="button" class="btn btn-primary convert2input" id="name">Change name</button>
+                                    {%if isOwner%}<button type="button" class="btn btn-outline-secondary convert2input" id="name">Change name</button>{% endif %}
                                     </div>
                                 </div>
                                 <div class="card text-center">
                                     <div class="card-body">
                                     <h5 class="card-title">Surname</h5>
                                     <p class="card-text">{{ owner.surname }}</p>
-                                    <button type="button" class="btn btn-primary convert2input" id="surname">Change surname</button>
+                                    {%if isOwner%}<button type="button" class="btn btn-outline-secondary convert2input" id="surname">Change surname</button>{% endif %}
                                     </div>
                                 </div>
                                 <div class="card text-center">
                                     <div class="card-body">
                                     <h5 class="card-title">Age</h5>
                                     <p class="card-text">{{ owner.age }}</p>
-                                    <button type="button" class="btn btn-primary convert2input" id="age">Change age</button>
+                                    {%if isOwner%}<button type="button" class="btn btn-outline-secondary convert2input" id="age">Change age</button>{% endif %}
                                     </div>
                                 </div>
                                 <div class="card text-center">
                                     <div class="card-body">
                                     <h5 class="card-title">Country</h5>
                                     <p class="card-text">{{ owner.country }}</p>
-                                    <button type="button" class="btn btn-primary dropdown-countries" id="country">Change country</button>
+                                    {%if isOwner%}<button type="button" class="btn btn-outline-secondary dropdown-countries" id="country">Change country</button>{% endif %}
                                     </div>
                                 </div>
 
-                                <button class="btn btn-primary invisible mt-2" id="submit-form" name="button" value="change-user">Submit changes</button>
+                                {%if isOwner%}<button class="btn btn-primary invisible mt-2" id="submit-form" name="button" value="change-user">Submit changes</button>{% endif %}
                             </form>
                         </div>
-                    {% endif %}
+                   
 
                 </div>           
             </div>
@@ -104,13 +99,7 @@
         //for the dropdown countries menu
         $(".dropdown-countries").click(function() {
             $(this).prev().replaceWith('<select class="form-select" name="country_id" aria-label="Default select example"><option selected>Select a country from the dropdown</option>{%if countries%}{%for key, country in countries%}<option value="{{key}}">{{country.name}}</option>{%endfor%}{%endif%}</select>');
-            //$(this).prev().addClass("w-25 d-flex justify-content-center");
-            //$(this).prev().addClass("d-inline card-text mb-2");
-
-            //$(this).prev().attr("name", $(this).attr("id"));
-
             $(this).remove();
-
             $("#submit-form").removeClass("invisible");
         });
         </script>

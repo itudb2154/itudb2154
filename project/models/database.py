@@ -75,14 +75,14 @@ class Database:
         ingredients = []
         with psycopg2.connect(self.conn, sslmode='require') as connection:
             cursor = connection.cursor()
-            query = 'select ingredients_of_meal.ingredient_id, ingredient.name, ingredient.protein, ingredient.calorie, ingredient.fat, ingredient.type, ingredients_of_meal.measurement_quantity from ingredients_of_meal JOIN ingredient ON ingredient.id = ingredients_of_meal.ingredient_id WHERE (recipe_id = %s);'
+            query = 'select ingredients_of_meal.id, ingredients_of_meal.ingredient_id, ingredient.name, ingredient.protein, ingredient.calorie, ingredient.fat, ingredient.type, ingredients_of_meal.measurement_quantity from ingredients_of_meal JOIN ingredient ON ingredient.id = ingredients_of_meal.ingredient_id WHERE (recipe_id = %s);'
             cursor.execute(query, [key])
             connection.commit()
             ingredientsDB = cursor.fetchall()
 
-            for ingredient_id, recipeName, recipeProtein, recipeCalorie, recipeFat, recipeType, measurementQuantity in ingredientsDB:
-                ingredient = Ingredient(recipeName, recipeProtein, recipeCalorie, recipeFat, recipeType, measurementQuantity)
-                ingredients.append((ingredient_id, ingredient))#be careful, ingredient_id is not unique, there might be multiple elements with different measurements
+            for ingMealId, ingredient_id, recipeName, recipeProtein, recipeCalorie, recipeFat, recipeType, measurementQuantity in ingredientsDB:
+                ingredient = Ingredient(ingredient_id, recipeName, recipeProtein, recipeCalorie, recipeFat, recipeType, measurementQuantity)
+                ingredients.append((ingMealId, ingredient))#be careful, ingredient_id is not unique, there might be multiple elements with different measurements
             return ingredients
 
     def getIngredients(self):
@@ -95,7 +95,7 @@ class Database:
             ingredientsDB = cursor.fetchall()
 
             for recipeId, recipeName, recipeProtein, recipeCalorie, recipeFat, recipeType in ingredientsDB:
-                ingredient = Ingredient(recipeName, recipeProtein, recipeCalorie, recipeFat, recipeType, 0)
+                ingredient = Ingredient(recipeId, recipeName, recipeProtein, recipeCalorie, recipeFat, recipeType, 0)
                 ingredients.append((recipeId, ingredient))
             return ingredients
     
@@ -104,7 +104,7 @@ class Database:
             cursor = connection.cursor()
             for ingredient, measure in zip(ingredients, measures):
                 query = '''insert into ingredients_of_meal (recipe_id, ingredient_id, measurement_quantity) values (%s, (select id from ingredient where (name=%s)), %s);'''
-                cursor.execute(query, (recipeId[0], ingredient, measure))
+                cursor.execute(query, (recipeId, ingredient, measure))
 
             connection.commit()
 
@@ -287,3 +287,48 @@ class Database:
             query = 'DELETE FROM "user" WHERE id=%s;'
             cursor.execute(query, [id2delete])
             connection.commit()
+
+    def deleteRecipe(self, id):
+        with psycopg2.connect(self.conn, sslmode='require') as connection:
+            cursor = connection.cursor()
+            query = 'DELETE FROM "recipe" WHERE id=%s;'
+            cursor.execute(query, [id])
+            connection.commit()
+    
+    def deleteIngredient(self, id):
+        with psycopg2.connect(self.conn, sslmode='require') as connection:
+            cursor = connection.cursor()
+            query = 'DELETE FROM ingredients_of_meal WHERE id=%s;'
+            cursor.execute(query, [id])
+            connection.commit()
+
+    def deleteUserMenu(self, id):
+        with psycopg2.connect(self.conn, sslmode='require') as connection:
+            cursor = connection.cursor()
+            query = 'DELETE FROM "userMenu" WHERE id=%s;'
+            cursor.execute(query, [id])
+            connection.commit()
+
+    def updateIngredientOfMeals(self, myDict):
+        with psycopg2.connect(self.conn, sslmode='require') as connection:
+            cursor = connection.cursor()
+            arr = []
+            for key, value in myDict:
+                arr.append(value)
+            
+            print(arr)
+            query = 'UPDATE "ingredients_of_meal" SET ingredient_id = %s, measurement_quantity = %s WHERE id = %s;'
+            cursor.execute(query, arr)
+
+    def addIngredient(self, myDict, recipeId):
+        with psycopg2.connect(self.conn, sslmode='require') as connection:
+            cursor = connection.cursor()
+            arr = []
+            arr.append(recipeId)
+            for key, value in myDict:
+                arr.append(value)
+            
+            print(arr)
+            query = 'INSERT INTO "ingredients_of_meal" (recipe_id, ingredient_id, measurement_quantity) VALUES(%s, %s, %s);'
+            cursor.execute(query, arr)
+    

@@ -15,7 +15,7 @@ TABLE_CREATE_QUERY = [
         '''CREATE TABLE IF NOT EXISTS "meal" (
             "id" SERIAL PRIMARY KEY,
             "name" VARCHAR(80),
-            "category_id" int,
+            "category_id" int NOT NULL,
             "photo_url" VARCHAR,
             "coisine_name" VARCHAR(80),
             "country_id" INTEGER NOT NULL
@@ -57,8 +57,8 @@ TABLE_CREATE_QUERY = [
             "user_id" INTEGER NOT NULL,
             "recipe_id" INTEGER NOT NULL,
             "message" VARCHAR(200),
-            "created_date" timestamp,
-            "updated_date" timestamp,
+            "created_date" INTEGER,
+            "updated_date" INTEGER,
             "text_color" VARCHAR(50),
             "language" VARCHAR(50)
             )''',
@@ -74,17 +74,17 @@ TABLE_CREATE_QUERY = [
             "id" SERIAL PRIMARY KEY,
             "title" VARCHAR(50),
             "description" VARCHAR,
-            "created_date" int,
-            "updated_date" int,
+            "created_date" INTEGER,
+            "updated_date" INTEGER,
             "notes" VARCHAR,
-            "user_id" int
+            "user_id" INTEGER NOT NULL
             )''',
 
         '''CREATE TABLE IF NOT EXISTS "menuContent" (
-            "menu_id" int,
-            "meal_id" int
+            "id" SERIAL PRIMARY KEY,
+            "menu_id" int NOT NULL,
+            "meal_id" int NOT NULL
             )''',
-
 
         '''ALTER TABLE "meal" ADD FOREIGN KEY ("country_id") REFERENCES "country" ("id") ON DELETE SET NULL ON UPDATE CASCADE''',
 
@@ -103,17 +103,17 @@ TABLE_CREATE_QUERY = [
         '''ALTER TABLE "ingredients_of_meal" ADD FOREIGN KEY ("recipe_id") REFERENCES "recipe" ("id") ON DELETE CASCADE ON UPDATE CASCADE''',
 
         '''ALTER TABLE "ingredients_of_meal" ADD FOREIGN KEY ("ingredient_id") REFERENCES "ingredient" ("id") ON DELETE SET NULL ON UPDATE CASCADE''',
-
-        '''ALTER TABLE "userMenu" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("id") ON DELETE CASCADE ON UPDATE CASCADE''',
-
+        
         '''ALTER TABLE "menuContent" ADD FOREIGN KEY ("menu_id") REFERENCES "userMenu" ("id") ON DELETE CASCADE ON UPDATE CASCADE''',
 
         '''ALTER TABLE "menuContent" ADD FOREIGN KEY ("meal_id") REFERENCES "meal" ("id") ON DELETE SET NULL ON UPDATE CASCADE''',
+        
+        '''ALTER TABLE "userMenu" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("id") ON DELETE CASCADE ON UPDATE CASCADE'''
 
 
 ]
 
-connection = psycopg2.connect("postgres://pylafsgesfibkp:008aa6f8817e256b98e034493c344833da4b0447a1d11fb05073ea4ec87447ff@ec2-35-153-88-219.compute-1.amazonaws.com:5432/db0rfao3q1lr16",sslmode = 'require')
+connection = psycopg2.connect("postgres://pylafsgesfibkp:008aa6f8817e256b98e034493c344833da4b0447a1d11fb05073ea4ec87447ff@ec2-35-153-88-219.compute-1.amazonaws.com:5432/db0rfao3q1lr16", sslmode = 'require')
 cursor = connection.cursor()
 
 #deleting all the previous tables to recreate them
@@ -125,8 +125,8 @@ cursor.execute('''
                 DROP TABLE IF EXISTS recipe cascade;
                 DROP TABLE IF EXISTS ingredient cascade;
                 DROP TABLE IF EXISTS comment cascade;
-                DROP TABLE IF EXISTS user_menu cascade;
-                DROP TABLE IF EXISTS menuContents cascade;
+                DROP TABLE IF EXISTS "userMenu" cascade;
+                DROP TABLE IF EXISTS "menuContent" cascade;
                 DROP TABLE IF EXISTS ingredients_of_meal cascade;
                 
             ''')
@@ -143,7 +143,7 @@ cursor.execute('''INSERT INTO country (name) VALUES ('adminLand');''')
 connection.commit()
 
 #inserting admin to user table once
-cursor.execute('''INSERT INTO "user" (name, country_id) VALUES ('admin', (select id from country where name='adminLand'));''')
+cursor.execute('''INSERT INTO "user" (name, country_id, role_id) VALUES ('admin', (select id from country where name='adminLand'), 1);''')
 connection.commit()
 
 z = 0
@@ -163,7 +163,6 @@ for c in "abc":
 
         #insert its category if it does not exist
         cursor.execute('''INSERT INTO meal (name, country_id, category_id, photo_url) VALUES (%s, (select id from country where name=%s), (select id from category where name=%s), %s) ON CONFLICT DO NOTHING;''', (data["meals"][j]["strMeal"], data["meals"][j]["strArea"], data["meals"][j]["strCategory"], data["meals"][j]["strMealThumb"]))
-        
 
 
         #replace single quote with double single quotes (to aviod to errors if the instruction itself has single quotes like don't)

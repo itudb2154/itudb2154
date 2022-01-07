@@ -37,20 +37,38 @@
                         <div class="text-center">
                             <h1 class="display-3">Ingredients</h1>
                         </div>
-                        <div class="row mt-3">
-                        {%if ingredients%}
-                        {%for key, ingredient in ingredients%}
-                        <div class="card col-sm-3">
-                            <div class="card-body">
-                              <h5 class="card-title">{{ ingredient.name }}</h5>
-                              <p class="card-text">{{ ingredient.measurement_quantity }}</p>
-                              {%if user==owner%}<a href="#" class="btn btn-dark">Edit</a>{%endif%}
+                        
+                            <div class="row mt-3">
+                            {%if ingredients%}
+                            {%for key, ingredient in ingredients%}
+                            
+                                <div class="card col-sm-3">
+                                    <form action="/recipe/{{recipe[0]}}" method="POST">
+                                        <div class="card-body">
+                                            <h5 class="card-title">{{ ingredient.name }}</h5>
+                                            <p class="card-text">{{ ingredient.measurement_quantity }}</p>
+                                            {%if user==owner%}
+                                                <input type="text" name="ing_of_meals_id" value="{{key}}" style="display:none">
+                                                <button type="button" class="btn btn-outline-secondary dropdown-ingredient">Edit</button>
+                                                <button type="submit" name="button" class="btn btn-outline-primary update-btn" id="{{key}}" value="updateIng">Update</button>
+                                                <button type="submit" name="button" class="btn btn-outline-danger" value="deleteIng" id="{{key}}">Delete</button>
+                                            {% endif %}
+                                            </form>
+                                        </div>
+                                </div>
+                           
+                            {%endfor%}
+                            {%endif%}
                             </div>
-                        </div>
-                        {%endfor%}
-                        {%endif%}
-                        </div>
-
+                            <div class="row row-cols-1 row-cols-sm-4 d-flex justify-content-center">
+                                <form method="POST" class="signin-form" action="/recipe/{{recipe[0]}}/addIng">
+                                    <div class="form-group me-2 mt-2">
+                                    <button type="submit" name="button" value="addIngredient" class="form-control btn btn-dark submit px-3">
+                                        Add ingredient
+                                    </button>
+                                    </div>
+                                </form>
+                            </div>
                         <div class="text-center mt-3">
                             <h1 class="display-3">Comments</h1>
                         </div>
@@ -60,7 +78,7 @@
                         <div class="card mb-3">
                             <div class="card-body">
                               <h5 class="card-title">{{ comment.user_name }}</h5>
-                              <p class="card-text" style="color:{{comment.text_color}};">{{ comment.message }}</p>
+                              <p class="card-text" style="color:{{ comment.text_color }};">{{ comment.message }}</p>
                               {%if user==comment.user_id%}<a href="#" class="btn btn-primary">Edit</a>{%endif%}
                               <div class="mt-1"><small class="text-muted"> Created at {{ comment.created_date }}</small></div>
                             </div>
@@ -94,5 +112,25 @@
                 </div>            
             </div>
         </div>
+        <script>
+            $(".convert2input").click(function() {
+                var input = $("<input>", { val: $(this).prev().text(),
+                                        type: "text",
+                                        name: $(this).attr("id")});
+                $(this).prev().replaceWith(input);
+                $(this).prev().addClass("d-inline card-text mb-2");
+
+                //$(this).prev().attr("name", $(this).attr("id"));
+
+                $(this).remove();
+
+                input.select();
+            });
+            $(".dropdown-ingredient").click(function() {
+                $(this).prev().prev().prev().replaceWith('<select class="form-select" name="ingredient_id" aria-label="Default select example"><option selected>Select ingredient</option>{%if allingredients%}{%for key, ingredient in allingredients%}<option value="{{key}}">{{ingredient.name}}</option>{%endfor%}{%endif%}</select>');
+                $(this).prev().prev().replaceWith('<label for="quantity" style="margin-right:10px;" class="form-label">Quantity: </label><input type="text" name="quantity">');
+                $("#submit-form").removeClass("invisible");
+            });
+        </script>
 {% endblock %}
 

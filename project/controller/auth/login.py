@@ -68,6 +68,7 @@ def login():
 
 @app.route('/register', methods = ['GET', 'POST'])
 def register():
+    countries = db.getAllCountries();
     if session.get("id"):
         return redirect("/")
 
@@ -81,22 +82,20 @@ def register():
         # generate binary hash of "hello" string
         hash = d.hexdigest()
         #crpytion complete
-
-        cursor.execute('''SELECT id FROM "user" where mail='%s';''' % (request.form['email']))
+        query = '''SELECT id FROM "user" where mail=%s;'''
+        cursor.execute(query, [request.form['email']])
         response = cursor.fetchone()
         if response != None:
             return render_template('register.html', error=True)
         #db insertion test
-        cursor.execute('''INSERT INTO "user" (name, password, mail, country_id) VALUES ('%s', '%s', '%s', (select id from country where name='adminLand')) ON CONFLICT DO NOTHING;''' % (request.form['name'], hash, request.form['email']))
+        query = '''INSERT INTO "user" (name, surname, password, mail, country_id, age, role_id) VALUES (%s, %s, %s, %s, %s, %s, 0) ON CONFLICT DO NOTHING;'''
+        cursor.execute(query,(request.form['name'], request.form['surname'], hash, request.form['email'], request.form['country'], request.form['age']))
         
         connection.commit()
 
-        cursor.execute('''SELECT * FROM "user";''')
-        print(cursor.fetchall())
-
         return render_template('register.html', success=True),  {"Refresh": "2; url=/login"}
 
-    return render_template('register.html')
+    return render_template('register.html', countries=countries)
 
 
 @app.route('/', methods = ['GET', 'POST'])
@@ -158,7 +157,7 @@ def addrecipe():
         ingredients = request.form.getlist('ingredient')
         measures = request.form.getlist('measure')
 
-        db.addRecipeIngredient(ingredients, measures, recipeId)
+        db.addRecipeIngredient(ingredients, measures, recipeId[0])
         
         return redirect(url_for('index'))
 
@@ -208,6 +207,21 @@ def recipes(ownerId):
 
     return render_template('recipes.html', recipes=recipes, user=user, owner=owner)
 
+@app.route('/recipe/<int:recipeId>/addIng', methods = ['GET', 'POST'])
+@login_required
+def addIng(recipeId):
+    user = session.get("id")
+    recipe = db.getRecipe(recipeId)
+    owner = recipe[1].user_id
+    allingredients = db.getIngredients()
+    if request.method == 'POST' and user==owner and request.form['button'] == "add":
+        ingredients = request.form.getlist('ingredient')
+        measures = request.form.getlist('measure')
+        db.addRecipeIngredient(ingredients, measures, recipeId)
+        url = "/recipe/" + str(recipeId)
+        return redirect(url)
+    return render_template('addIngredient.html', allingredients=allingredients, user=user, owner=owner)
+
 @app.route('/recipe/<int:recipeId>', methods = ['GET', 'POST'])
 @login_required
 def recipe(recipeId):
@@ -217,18 +231,41 @@ def recipe(recipeId):
     recipe = db.getRecipe(recipeId)
     ingredients = db.getIngredientsOfARecipe(recipeId)
     owner = recipe[1].user_id
+    allingredients = db.getIngredients()
 
     if request.method == 'POST':
-        
-        if request.form['button'] == "view":
-            #only show contents, dont edit
-            return render_template("recipe.html", recipe=recipe, ingredients=ingredients, user=user, owner=owner, comments=comments)
-
-        elif request.form['button'] == "edit":
+        if request.form['button'] == "deleteRecipe":
             if user==owner:
-                return render_template("recipe.html", recipe=recipe, ingredients=ingredients, edit=True)
+                db.deleteRecipe(recipeId)
+                url = "/user/" + str(owner) + "/recipes"
+                return redirect(url)
+            return
+
+        elif request.form['button'] == "deleteIng":
+            if user==owner:
+                for key, value in request.form.items():
+                    if(value != "deleteIng"):
+                        print(key, value)
+                        db.deleteIngredient(value)
+
+                url = "/recipe/" + str(recipeId)
+                return redirect(url)
+            return
+
+        elif request.form['button'] == "updateIng":
+            if user==owner:
+                myDict = []
+                for key, value in request.form.items():
+                    if(value != "updateIng"):
+                        myDict.append((key, value))
+                
+                db.updateIngredientOfMeals(myDict)
+
+                url = "/recipe/" + str(recipeId)
+                return redirect(url)
+                
+
             return 
-            
 
         elif request.form['button'] == "comment":
             #the user in the session is making a comment
@@ -239,8 +276,7 @@ def recipe(recipeId):
 
             return render_template('recipe.html', recipe=recipe, ingredients=ingredients, user=user, owner=owner, comments=comments)
 
-
-    return render_template('recipe.html', recipe=recipe, ingredients=ingredients, user=user, owner=owner, comments=comments,)
+    return render_template('recipe.html', recipe=recipe, ingredients=ingredients, user=user, owner=owner, comments=comments, allingredients=allingredients)
 
 @app.route('/menus/<int:ownerId>/menu/<int:menuId>', methods = ['GET', 'POST'])
 @login_required
@@ -257,22 +293,28 @@ def menu(ownerId, menuId):
             return render_template("menu.html", menu=menu, user=user, owner=owner, meals=meals)
 
         elif request.form.get('button') == "edit":
+            if user==owner:
+                return render_template("menu.html", menu=menu, user=user, owner=owner, meals=meals)
+            return
 
-            #only show contents, dont edit
-
-            return render_template("menu.html", menu=menu, user=user, owner=owner, meals=meals)
+        elif request.form.get('button') == "delete":
+            if user==owner:
+                db.deleteUserMenu(menuId)
+                return render_template("menu.html", menu=menu, user=user, owner=owner, meals=meals)
+            return
 
     return render_template('menu.html', menu=menu, user=user, owner=owner, meals=meals)
 
 #My profile should be created.
 
 @app.route('/user/<int:userId>', methods = ['GET', 'POST'])
-@login_required
 def user(userId):
     user = session.get("id")      #current user in the session
     owner = db.getUser(userId)  #owner of the current page
 
-    if request.method == 'POST' and request.form.get('button') == "change-user":
+    isOwner = (user == userId)
+
+    if request.method == 'POST' and request.form.get('button') == "change-user" and isOwner:
         myDict = []
         for key, value in request.form.items():
             if(value != "change-user"):
@@ -282,7 +324,8 @@ def user(userId):
         owner = db.updateUser(myDict, userId)
 
     countries = db.getAllCountries()
-    isOwner = (user == userId)
+    
+
     return render_template("user.html", user=user, owner=owner, isOwner=isOwner, countries=countries)
 
 
@@ -298,5 +341,5 @@ def admin():
 
     allUsers = db.getAllUsers()
 
-    return render_template("adminPanel.html", user=user, allUsers = allUsers)
+    return render_template("adminPanel.html", user=user, allUsers=allUsers)
 

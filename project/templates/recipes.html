@@ -22,7 +22,9 @@
                       <div class="btn-group">
                         <form action="/recipe/{{key}}" method="POST">
                           <button type="submit" name="button" value="view" class="btn btn-sm btn-outline-secondary">View</button>
-                          {%if owner == user%}<button type="submit" name="button" value="edit" class="btn btn-sm btn-outline-secondary">Edit</button>{%endif%}
+                          {%if owner == user%}
+                          <button type="submit" name="button" value="deleteRecipe" class="btn btn-sm btn-outline-danger">Delete</button>
+                          {%endif%}
                         </form>
                       </div>
                       <small class="text-muted">{{recipe.recipe_name}}</small>
