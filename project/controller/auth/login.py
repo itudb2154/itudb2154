@@ -4,7 +4,7 @@ from flask_wtf import FlaskForm
 from project.models.database import *
 from project.models.recipe import *
 import time
-import datetime  
+
 
 db = Database("postgres://pylafsgesfibkp:008aa6f8817e256b98e034493c344833da4b0447a1d11fb05073ea4ec87447ff@ec2-35-153-88-219.compute-1.amazonaws.com:5432/db0rfao3q1lr16")
 
@@ -181,9 +181,10 @@ def menus(ownerId):
 @app.route('/logout', methods = ['GET', 'POST'])
 @login_required
 def logout():
-    role_id = session.get("role_id")
+
     if session.get("id"):
         session["id"] = None
+        session["role_id"] = None
         
     return redirect("/")
 
@@ -297,7 +298,9 @@ def recipe(recipeId):
     recipe = db.getRecipe(recipeId)	
     ingredients = db.getIngredientsOfARecipe(recipeId)	
     owner = recipe[1].user_id	
-    allingredients = db.getIngredients()	
+    allingredients = db.getIngredients()
+    allMeals = db.get_meals()
+
     #change the created date 	
     dateNow = int(time.time())	
     for key, comment in comments:	
@@ -376,9 +379,20 @@ def recipe(recipeId):
             if user==comment[0][1].user_id:	
                 db.deleteComment(request.form['id2delete'])	
                 url = "/recipe/" + str(recipeId)	
-                return redirect(url)	
+                return redirect(url)
+        elif request.form['button'] == "submit-change":	
+            if user==owner:
+                myDict = []
+                for key, value in request.form.items():
+                    if(value != "submit-change"):
+                        myDict.append((key, value))
+                
+                db.updateRecipe(myDict, recipeId)
+     
+                url = "/recipe/" + str(recipeId)
+                return redirect(url)
             	
-    return render_template('recipe.html', recipe=recipe, ingredients=ingredients, user=user, owner=owner, comments=comments, allingredients=allingredients, role_id=role_id)
+    return render_template('recipe.html', recipe=recipe, ingredients=ingredients, user=user, owner=owner, comments=comments, allingredients=allingredients, role_id=role_id, allMeals=allMeals)
 
 @app.route('/menu/<int:menuId>', methods = ['GET', 'POST'])
 @login_required
@@ -446,19 +460,23 @@ def user(userId):
 
     isOwner = (user == userId)
 
+    countries = db.getAllCountries()
+
     if request.method == 'POST' and request.form.get('button') == "change-user" and isOwner:
         myDict = []
         for key, value in request.form.items():
             if(value != "change-user"):
                 myDict.append((key, value))
-                #myDict[i].value galiba
+                
         
-        owner = db.updateUser(myDict, userId)
+        error = db.updateUser(myDict, userId) # Can be used as error code******
+        if(error == 0):
+            owner = db.getUser(userId)
 
-    countries = db.getAllCountries()
-    
+        return render_template("user.html", user=user, owner=owner, isOwner=isOwner, countries=countries, role_id=role_id, error=error)
+        
 
-    return render_template("user.html", user=user, owner=owner, isOwner=isOwner, countries=countries, role_id=role_id)
+    return render_template("user.html", user=user, owner=owner, isOwner=isOwner, countries=countries, role_id=role_id, error=0)
 
 
 @app.route('/adminPanel', methods = ['GET', 'POST'])
@@ -480,6 +498,17 @@ def admin():
     
     elif request.method == 'POST' and request.form.get('button') == "update":
         db.updateMeal(request.form['key'],request.form['name'], request.form['photo_url'], request.form['coisine_name'], request.form['country_name'], request.form['category_name'])
+        return redirect("/adminPanel?meal=true")
+
+    elif request.method == 'POST' and request.form.get('button') == "addMeal":
+        countries = db.getAllCountries()
+        categories = db.getAllCategories()
+        
+        return render_template("addMealPage.html", user=userid, countries=countries, categories=categories, role_id=role_id)
+        
+    elif request.method == 'POST' and request.form.get('button') == "submit-add":
+        newMeal = Meal(request.form['name'], request.form['category_name'], request.form['photo_url'], request.form['coisine_name'], request.form['country_name'], )
+        db.createMeal(newMeal)
         return redirect("/adminPanel?meal=true")
 
     user = request.args.get('user')

@@ -113,7 +113,7 @@
                 var input = $("<input>", { val: $(this).parent().text().trim(),
                                         type: "text",
                                         name: $(this).attr("id")});
-                var cloneBtn = $(this);
+
                 $(this).parent().replaceWith(input);
                 $(this).parent().addClass("d-inline card-text mb-2");
 

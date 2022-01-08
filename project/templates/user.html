@@ -58,9 +58,25 @@
                                 </div>
                                 <div class="card text-center">
                                     <div class="card-body">
+                                    <h5 class="card-title">Password</h5>
+                                    <p class="card-text">************</p>
+                                    {%if isOwner%}<button type="button" class="btn btn-outline-secondary convert2inputPass" id="password">Change password</button>{% endif %}
+                                    <label class="form-label" style="display: block; margin:0 auto !important; color:red ">
+                                        {%if error == 1 %}
+                                            Current Password is incorrect
+                                        {% endif %}
+                                        {%if error == 2 %}
+                                            New Passwords are not matching
+                                        {% endif %}
+                                    </label>
+                                    </div>
+                                </div>
+                                <div class="card text-center">
+                                    <div class="card-body">
                                     <h5 class="card-title">Age</h5>
                                     <p class="card-text">{{ owner.age }}</p>
                                     {%if isOwner%}<button type="button" class="btn btn-outline-secondary convert2input" id="age">Change age</button>{% endif %}
+                                    
                                     </div>
                                 </div>
                                 <div class="card text-center">
@@ -70,8 +86,11 @@
                                     {%if isOwner%}<button type="button" class="btn btn-outline-secondary dropdown-countries" id="country">Change country</button>{% endif %}
                                     </div>
                                 </div>
-
-                                {%if isOwner%}<button class="btn btn-primary invisible mt-2" id="submit-form" name="button" value="change-user">Submit changes</button>{% endif %}
+                                <div class="row row-cols-1 row-cols-sm-4 d-flex justify-content-center">
+                                    <div class="form-group mt-2">
+                                        {%if isOwner%}<button class="btn btn-primary invisible" id="submit-form" name="button" value="change-user">Submit changes</button>{% endif %}
+                                    </div>
+                                </div>
                             </form>
                         </div>
                    
@@ -94,6 +113,46 @@
             $("#submit-form").removeClass("invisible");
                 
             input.select();
+        });
+
+        $(".convert2inputPass").click(function() {
+            var input = $("<input>", { type: "password",
+                                       placeholder: "New Password",
+                                       name: "pwd_re",
+                                    });
+
+            var input2 = $("<input>", { type: "password",
+                                       placeholder: "New Password again",
+                                       name: $(this).attr("id")});
+           
+            var currentPass = $("<input>", { type: "password",
+                                       placeholder: "Current Password",
+                                       name: "pass-current"});
+
+            
+
+            $(input).addClass("card-text mb-2 mx-auto");
+            $(input2).addClass("card-text mb-2 mx-auto");
+            $(currentPass).addClass("card-text mb-2 mx-auto");
+
+            $(input).css("display", "block");
+            $(input2).css("display", "block");
+            $(currentPass).css("display", "block");
+
+            $(this).prev().replaceWith(input2);
+            $(this).prev().before(currentPass);
+            $(this).prev().before(input);
+            $(this).remove();
+
+            // NOT USED
+            /*$('#password, #confirm_password').on('keyup', function () {
+                if ($('#password').val() == $('#confirm_password').val()) {
+                    $('#message').html('Matching').css('color', 'green');
+                } else 
+                    $('#message').html('Not Matching').css('color', 'red');
+                });*/
+                                    
+            $("#submit-form").removeClass("invisible");
         });
 
         //for the dropdown countries menu

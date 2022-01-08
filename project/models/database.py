@@ -1,4 +1,6 @@
+from re import A
 import psycopg2
+import hashlib
 from project.models.category import Category
 
 from project.models.ingredient import Ingredient
@@ -62,7 +64,7 @@ class Database:
         meals = []
         with psycopg2.connect(self.conn, sslmode='require') as connection:
             cursor = connection.cursor()
-            query = 'select meal.id, meal.name, category.name, meal.photo_url, meal.coisine_name, meal.country_id from meal JOIN category ON (meal.category_id=category.id) ORDER BY meal.id ASC;'
+            query = 'select meal.id, meal.name, category.name, meal.photo_url, meal.coisine_name, country.name from meal JOIN category ON (meal.category_id=category.id) JOIN country ON (meal.country_id=country.id) ORDER BY meal.id ASC;'
             cursor.execute(query)
             connection.commit()
             mealsDb = cursor.fetchall()
@@ -212,12 +214,40 @@ class Database:
 
     
     def updateUser(self, myDict, userId):
+        
         with psycopg2.connect(self.conn, sslmode='require') as connection:
             cursor = connection.cursor()
+            new_dict = []
+            passwordTemp = 0
+
+            for key, value in myDict:
+
+                if key == "pass-current":
+                    plaintext = value.encode()
+                    d = hashlib.sha256(plaintext)
+                    hash_ = d.hexdigest()
+                    query = 'SELECT password FROM "user" where id=%s'
+                    cursor.execute(query, [userId])
+                    if cursor.fetchone()[0] != hash_:
+                        return 1
+
+                elif key == 'pwd_re':
+                    passwordTemp = value
+
+                elif key == "password":
+                    if value == passwordTemp:   
+                        plaintext = value.encode()
+                        d = hashlib.sha256(plaintext)
+                        hash_ = d.hexdigest()
+                        new_dict.append((key, hash_))
+                    else:
+                        return 2
+                else:
+                    new_dict.append((key, value))
 
             arr = []
             query = 'UPDATE "user" SET '
-            for key, value in myDict:
+            for key, value in new_dict:
                 substring = ' = %s, '
                 substring = key + substring
                 arr.append(value)
@@ -230,15 +260,8 @@ class Database:
 
             cursor.execute(query, arr)
             connection.commit()
-
-            query = 'select "user".id, "user".name, "user".surname, "user".mail, "user".password, "user".age, country.name, "user".role_id from "user" JOIN country ON ("user".country_id = country.id) where ("user".id = %s);'
             
-            cursor.execute(query, [userId])
-            connection.commit()
-            userDb = cursor.fetchone()
-            
-            user = User(userDb[0], userDb[1], userDb[2], userDb[3], userDb[4], userDb[5], userDb[6], userDb[7])
-            return user
+            return 0
 
     def getAllCountries(self):
         countries = []
@@ -435,3 +458,26 @@ class Database:
             query = 'UPDATE "meal" SET name = %s, photo_url = %s, coisine_name = %s, country_id = %s, category_id = %s WHERE id = %s;'
             cursor.execute(query, (name, photo_url, coisine_name, country_name, category_name, key))
             connection.commit()
+
+    def updateRecipe(self, myDict, recipeId):
+        with psycopg2.connect(self.conn, sslmode='require') as connection:
+            cursor = connection.cursor()
+            for key, value in myDict:
+                if key == 'recipe_name':
+                    query = 'UPDATE "recipe" SET name = %s WHERE id = %s;'
+                elif key == 'meal_id':
+                    query = 'UPDATE "recipe" SET meal_id = %s WHERE id = %s;'
+                elif key == 'instruction':
+                    query = 'UPDATE "recipe" SET instruction = %s WHERE id = %s;'
+                
+                cursor.execute(query, (value, recipeId))
+
+            connection.commit()
+    
+    def createMeal(self, newMeal):
+        with psycopg2.connect(self.conn, sslmode='require') as connection:
+            cursor = connection.cursor()
+            query = '''insert into "meal" (name, category_id, photo_url, coisine_name, country_id) values (%s, %s, %s, %s, %s);'''
+            cursor.execute(query, (newMeal.name, newMeal.category_name, newMeal.photo_url, newMeal.coisine_name, newMeal.country_name))
+            connection.commit()
+            
