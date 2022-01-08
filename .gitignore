@@ -5,3 +5,4 @@ venv
 venv/*
 flask_session
 flask_session/*
+secret.py
