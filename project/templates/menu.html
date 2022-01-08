@@ -73,7 +73,7 @@
                                     <p class="card-text"><b>Category</b><span style="margin-left:5px;" >{{ meal.category_name }}</span> </p>
                                     {%if user==owner%}
                                     <button type="button" class="btn btn-outline-secondary dropdown-meals">Edit</button>
-                                    <input type="text" name="menu_content_id" value="{{key}}" style="display:none">
+                                    <input type="text" class="form-text" name="menu_content_id" value="{{key}}" style="display:none">
                                     <button type="submit" style="display:none;"name="button" class="btn btn-outline-primary update-btn" id="{{key}}" value="updateMeal">Update</button>
                                     <button type="submit" name="button" class="btn btn-outline-danger" value="deleteMeal" id="{{key}}">Delete</button>
                                     {%endif%}
@@ -115,7 +115,7 @@
                                         name: $(this).attr("id")});
 
                 $(this).parent().replaceWith(input);
-                $(this).parent().addClass("d-inline card-text mb-2");
+                $(this).parent().addClass("d-inline card-text mb-2 form-text");
 
                 $("#submit-form").removeClass("invisible");
                     

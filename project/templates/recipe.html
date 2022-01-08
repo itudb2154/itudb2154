@@ -110,7 +110,7 @@
                                             </div>
                                             {%if user==owner%}
                                             <div class="w-100">
-                                                <input type="text" name="ing_of_meals_id" value="{{key}}" style="display:none">
+                                                <input type="text" class="form-text" name="ing_of_meals_id" value="{{key}}" style="display:none">
                                                 <button type="button" class="btn btn-outline-secondary dropdown-ingredient">Edit</button>
                                                 <button type="submit" style="display:none;" name="button" class="btn btn-outline-primary update-btn" id="{{key}}" value="updateIng">Update</button>
                                                 <button type="submit" name="button" class="btn btn-outline-danger" value="deleteIng" id="{{key}}">Delete</button>
@@ -147,8 +147,8 @@
                                 <p class="card-text" style="color:{{ comment.text_color }};">{{ comment.message }}</p>
                                 {%if user==comment.user_id%}<button type="button" class="btn btn-primary convert2textbox" id="{{key}}">Edit Comment</button>{%endif%}
                                 {%if user==comment.user_id%}<button type="submit" class="btn btn-danger" name="button" value="delete-comment">Delete Comment</button>{%endif%}
-                                {%if user==comment.user_id%}<input type="text" class="invisible" name="id2delete" value="{{key}}">{%endif%}
-                                <input value="{{key}}", type="text", class="invisible", name="comment_id">
+                                {%if user==comment.user_id%}<input type="text" class="invisible form-text" name="id2delete" value="{{key}}">{%endif%}
+                                <input value="{{key}}" type="text" class="invisible form-text" name="comment_id">
                                 <div class="mt-1 language-div"><small class="text-muted"> Created {{ comment.created_date }}. Language is <span id="language-span">{{ comment.language }}</span></small></div>
                                 {%if comment.updated_date%}<div class="mt-1"><small class="text-muted"> Updated {{ comment.updated_date }}</small></div>{%endif%}
                                 </div>
@@ -204,8 +204,7 @@
                                         name: $(this).attr("id")});
 
                 $(input).css("display", "block");
-                $(input).addClass("mt-2")
-
+                $(input).addClass("mt-2 form-text")
                 $(this).parent().replaceWith(input);
 
                 $("#submit-form").removeClass("invisible");

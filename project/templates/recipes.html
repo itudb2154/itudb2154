@@ -26,8 +26,8 @@
                     <p class="card-text"> {{recipe.meal_name}} </p>
                     <div class="d-flex justify-content-between align-items-center">
                       <div class="btn-group">
+                        <a href="/recipe/{{key}}"><button type="button" class="btn btn-sm btn-outline-secondary me-1">View</button></a>
                         <form action="/recipe/{{key}}" method="POST">
-                          <button type="submit" name="button" value="view" class="btn btn-sm btn-outline-secondary">View</button>
                           {%if owner == user%}
                           <button type="submit" name="button" value="deleteRecipe" class="btn btn-sm btn-outline-danger">Delete</button>
                           {%endif%}

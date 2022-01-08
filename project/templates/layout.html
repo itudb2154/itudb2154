@@ -24,6 +24,7 @@
 
   <body class="bg-light">
     <header class="p-3 bg-dark text-white">
+        <form action="/" method="POST">
         <div class="container">
           <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
             <a href="/" class="d-flex align-items-center mb-2 mb-lg-0 text-white text-decoration-none">
@@ -39,22 +40,30 @@
               {%endif%}
               {%if role_id == 1%}<a href="/adminPanel" class="nav-link px-2 text-white">Admin Panel</a>{%endif%}
             </ul>
-    
-            <form class="col-12 col-lg-auto mb-3 mb-lg-0 me-lg-3">
-              <input type="search" class="form-control form-control-dark" placeholder="Search..." aria-label="Search">
-            </form>
-    
+            {%if user%}
+            <div class="col-12 col-lg-auto mb-3 mb-lg-0 me-1">
+              <input type="search" name="searchValue" class="form-control form-control-dark" placeholder="Search..." aria-label="Search">
+            </div>
+            {%endif%}
+
             <div class="text-end">
               {%if not user%}
               <a href="/login" class="btn btn-outline-light me-2">Login</a>
               <a href="/register" class="btn btn-warning">Sign-up</a>
               {%endif%}
               {%if user%}
+              <button type="submit" name="button" value="search" class="btn btn-outline-light">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 17 17">
+                  <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"></path>
+                </svg>
+              </button>
               <a href="/logout" class="btn btn-warning">Log out</a>
               {%endif%}
             </div>
+            </form>
           </div>
         </div>
+      </form>
       </header>
       {% block content %}
       {% endblock content %}

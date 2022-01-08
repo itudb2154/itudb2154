@@ -24,8 +24,8 @@
             <p class="card-text"> {{menu.title}} </p>
             <div class="d-flex justify-content-between align-items-center">
               <div class="btn-group">
+                <a href="/menu/{{ key }}"><button type="button" class="btn btn-sm btn-outline-secondary me-1">View</button></a>
                 <form action="/menu/{{ key }}" method="POST">
-                  <button type="submit" name="button" value="view" class="btn btn-sm btn-outline-secondary">View</button>
                   {%if owner == user%}
                   <button type="submit" name="button" value="deleteMenu" class="btn btn-sm btn-outline-danger">Delete</button>
                   {%endif%}
