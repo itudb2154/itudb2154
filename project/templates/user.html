@@ -15,13 +15,13 @@
 
                     <div>
                         <div class="text-center">
-                            <h1 class="display-3">{%if isOwner%}Your{% endif %} Creations</h1>
+                            <h1 class="display-3">{%if isOwner %}Your{% endif %} Creations</h1>
                         </div>
                         <div class="row">
                             <div class="col">
                                 <div class="card text-center">
                                     <div class="card-body">
-                                      <h5 class="card-title"> {%if isOwner%}Your{% endif %} Menus</h5>
+                                      <h5 class="card-title"> {%if isOwner %}Your{% endif %} Menus</h5>
                                       <a href="/user/{{ owner.id }}/menus" class="btn btn-primary">Menus</a>
                                     </div>
                                 </div>
@@ -29,7 +29,7 @@
                             <div class="col">
                                 <div class="card text-center">
                                     <div class="card-body">
-                                      <h5 class="card-title">{%if isOwner%}Your{% endif %} Recipes</h5>
+                                      <h5 class="card-title">{%if isOwner %}Your{% endif %} Recipes</h5>
                                       <a href="/user/{{ owner.id }}/recipes" class="btn btn-primary">Recipes</a>
                                     </div>
                                 </div>

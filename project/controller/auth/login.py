@@ -1,18 +1,14 @@
 from project import app
-from flask import render_template, redirect, url_for, session, request
+from flask import render_template, redirect, session, request
 from project.models.database import *
 from project.models.recipe import *
 import hashlib
+import psycopg2
 
 from functools import wraps
-db = Database("postgres://pylafsgesfibkp:008aa6f8817e256b98e034493c344833da4b0447a1d11fb05073ea4ec87447ff@ec2-35-153-88-219.compute-1.amazonaws.com:5432/db0rfao3q1lr16")
+db = Database(app.config['DATABASE_URL'])
 
-app.config['SECRET_KEY'] = 'thisisthesecret'
-
-import psycopg2
-import requests
-
-connection = psycopg2.connect("postgres://pylafsgesfibkp:008aa6f8817e256b98e034493c344833da4b0447a1d11fb05073ea4ec87447ff@ec2-35-153-88-219.compute-1.amazonaws.com:5432/db0rfao3q1lr16",sslmode = 'require')
+connection = psycopg2.connect(app.config['DATABASE_URL'],sslmode = 'require')
 cursor = connection.cursor()
 
 def login_required(func):
@@ -38,7 +34,8 @@ def login():
         plaintext = request.form['password'].encode()
         d = hashlib.sha256(plaintext)
         hash = d.hexdigest()
-        cursor.execute('''SELECT id, role_id FROM users where mail='%s' and password='%s';''', (request.form['email'], hash))
+        query = "SELECT id, role_id FROM users where mail=%s and password=%s;"
+        cursor.execute(query, (request.form['email'], hash))
         response = cursor.fetchone()
  
         if response == None:

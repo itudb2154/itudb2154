@@ -8,22 +8,24 @@ from project.models.recipe import *
 db = Database("postgres://pylafsgesfibkp:008aa6f8817e256b98e034493c344833da4b0447a1d11fb05073ea4ec87447ff@ec2-35-153-88-219.compute-1.amazonaws.com:5432/db0rfao3q1lr16")
 app.config['SECRET_KEY'] = 'thisisthesecret'
 
-def admin_required(func):
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        role_id = session.get("role_id")
-        if role_id == 1:
-            return func(*args, **kwargs)
-            
-        else:
-            return redirect("/")
-    return wrapper
+
 
 def login_required(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
         user_id = session.get("id")
         if user_id:
+            return func(*args, **kwargs)
+            
+        else:
+            return redirect("/")
+    return wrapper
+
+def admin_required(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        role_id = session.get("role_id")
+        if role_id == 1:
             return func(*args, **kwargs)
             
         else:
@@ -56,7 +58,7 @@ def admin():
         db.updateMeal(request.form['key'],request.form['name'], request.form['photo_url'], request.form['coisine_name'], request.form['country_name'], request.form['category_name'])
         return redirect("/adminPanel?meal=true")
 
-    elif request.method == 'POST' and request.form.get('button') == "update-ingredient": #we came back from editIngredientPage, we update the ingredient and return back to admin panel
+    elif request.method == 'POST' and request.form.get('button') == "update-ingredient":
         db.updateIngredient(request.form['key'], request.form['name'], request.form['protein'], request.form['calorie'], request.form['fat'], request.form['ingType'])
         return redirect("/adminPanel?ingredient=true")
 
