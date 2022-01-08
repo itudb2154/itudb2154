@@ -1,0 +1,41 @@
+{% extends 'layout.html' %}
+
+{% block head_ext %}
+    <title>Edit Ingredient</title>
+{% endblock head_ext %}
+
+{% block content %}
+
+    <div class="container" style="width:50%">
+        <form action="/adminPanel" method="POST" class="signin-form mt-5">
+
+            <input style="display: none;" type="text" name="key" class="form-control" placeholder="Name" value="{{ingredientid}}" required="">
+
+            <div class="form-group mb-3">
+                <label class="label" for="name">Name</label>
+                <input type="text" name="name" class="form-control" placeholder="Name" value="{{editIngredient.name}}" required="">
+            </div>
+            <div class="form-group mb-3">
+                <label class="label" for="protein">Protein</label>
+                <input type="text" name="protein" class="form-control" value="{{editIngredient.protein}}" placeholder="Protein" required="">
+            </div>
+            <div class="form-group mb-3">
+                <label class="label" for="calorie">Calorie</label>
+                <input type="text" name="calorie" class="form-control" value="{{editIngredient.calorie}}" placeholder="Calorie" required="">
+            </div>
+            <div class="form-group mb-3">
+                <label class="label" for="fat">Fat</label>
+                <input type="text" name="fat" class="form-control" value="{{editIngredient.fat}}" placeholder="Fat" required="">
+            </div>
+            <div class="form-group mb-3">
+                <label class="label" for="ingType">Ingredient Type</label>
+                <input type="text" name="ingType" class="form-control" value="{{editIngredient.ingType}}" placeholder="Vegetable" required="">
+            </div>
+            
+            <div class="form-group">
+                <button type="submit" name="button" value="update-ingredient" class="form-control btn btn-dark submit px-3">Save Changes</button>
+            </div>
+        </form>
+    </div>
+
+{% endblock %}

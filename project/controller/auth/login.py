@@ -44,7 +44,6 @@ def calculateTime(myDict):
                 comment.updated_date = str(seconds) + " seconds ago"	
                 continue
 
-
 def login_required(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
@@ -91,7 +90,7 @@ def login():
         #crpytion complete
 
         #db selection test
-        cursor.execute('''SELECT id, role_id FROM "user" where mail='%s' and password='%s';''' % (request.form['email'], hash))
+        cursor.execute('''SELECT id, role_id FROM users where mail='%s' and password='%s';''' % (request.form['email'], hash))
         response = cursor.fetchone()
  
         if response == None:
@@ -120,13 +119,13 @@ def register():
         # generate binary hash of "hello" string
         hash = d.hexdigest()
         #crpytion complete
-        query = '''SELECT id FROM "user" where mail=%s;'''
+        query = '''SELECT id FROM users where mail=%s;'''
         cursor.execute(query, [request.form['email']])
         response = cursor.fetchone()
         if response != None:
             return render_template('register.html', error=True)
         #db insertion test
-        query = '''INSERT INTO "user" (name, surname, password, mail, country_id, age, role_id) VALUES (%s, %s, %s, %s, %s, %s, 0) ON CONFLICT DO NOTHING;'''
+        query = '''INSERT INTO users (name, surname, password, mail, country_id, age, role_id) VALUES (%s, %s, %s, %s, %s, %s, 0) ON CONFLICT DO NOTHING;'''
         cursor.execute(query,(request.form['name'], request.form['surname'], hash, request.form['email'], request.form['country'], request.form['age']))
         
         connection.commit()
@@ -194,7 +193,7 @@ def addrecipe():
     role_id = session.get("role_id")
     if request.method == 'POST':
         #assuming the recipe is given correctly
-        print(request.form['meal'])
+        
         recipe = Recipe(session["id"], request.form['name'], request.form['meal'], " ", request.form['instruction'], request.form['portion'], request.form['drink_alternate'], request.form['video_url'])
         recipeId = db.add_recipe(recipe)
         
@@ -300,8 +299,9 @@ def recipe(recipeId):
     owner = recipe[1].user_id	
     allingredients = db.getIngredients()
     allMeals = db.get_meals()
+    meal = db.getMealbyName(recipe[1].meal_name)
 
-    #change the created date 	
+    #change the created date 
     dateNow = int(time.time())	
     for key, comment in comments:	
         timePast = dateNow - comment.created_date	
@@ -334,7 +334,8 @@ def recipe(recipeId):
             if user==owner:	
                 for key, value in request.form.items():	
                     if(value != "deleteIng"):	
-                        db.deleteIngredient(value)	
+                        db.deleteIngredientofRecipe(value)	
+                        print(value)
                 url = "/recipe/" + str(recipeId)	
                 return redirect(url)	
             return	
@@ -392,7 +393,7 @@ def recipe(recipeId):
                 url = "/recipe/" + str(recipeId)
                 return redirect(url)
             	
-    return render_template('recipe.html', recipe=recipe, ingredients=ingredients, user=user, owner=owner, comments=comments, allingredients=allingredients, role_id=role_id, allMeals=allMeals)
+    return render_template('recipe.html', recipe=recipe, ingredients=ingredients, user=user, owner=owner, comments=comments, allingredients=allingredients, role_id=role_id, allMeals=allMeals, meal=meal)
 
 @app.route('/menu/<int:menuId>', methods = ['GET', 'POST'])
 @login_required
@@ -495,10 +496,19 @@ def admin():
         id2delete = request.form['delete-meal']
         db.deleteMeal(id2delete)
         return redirect("/adminPanel?meal=true")
+
+    elif request.method == 'POST' and request.form.get('delete-ingredient'):
+        id2delete = request.form['delete-ingredient']
+        db.deleteIngredient(id2delete)
+        return redirect("/adminPanel?ingredient=true")
     
     elif request.method == 'POST' and request.form.get('button') == "update":
         db.updateMeal(request.form['key'],request.form['name'], request.form['photo_url'], request.form['coisine_name'], request.form['country_name'], request.form['category_name'])
         return redirect("/adminPanel?meal=true")
+
+    elif request.method == 'POST' and request.form.get('button') == "update-ingredient": #we came back from editIngredientPage, we update the ingredient and return back to admin panel
+        db.updateIngredient(request.form['key'], request.form['name'], request.form['protein'], request.form['calorie'], request.form['fat'], request.form['ingType'])
+        return redirect("/adminPanel?ingredient=true")
 
     elif request.method == 'POST' and request.form.get('button') == "addMeal":
         countries = db.getAllCountries()
@@ -506,13 +516,23 @@ def admin():
         
         return render_template("addMealPage.html", user=userid, countries=countries, categories=categories, role_id=role_id)
         
+    elif request.method == 'POST' and request.form.get('button') == "addIngredient":
+        #when add ingredient button is clicked, we render addIngredientPage, choose its properties and return back to this route again
+        return render_template("addIngredientPage.html", user=userid, role_id=role_id)
+    
     elif request.method == 'POST' and request.form.get('button') == "submit-add":
         newMeal = Meal(request.form['name'], request.form['category_name'], request.form['photo_url'], request.form['coisine_name'], request.form['country_name'], )
         db.createMeal(newMeal)
         return redirect("/adminPanel?meal=true")
 
+    elif request.method == 'POST' and request.form.get('button') == "submit-add-ingredient":
+        newIngredient = Ingredient(0, request.form['name'], request.form['protein'], request.form['calorie'], request.form['fat'], request.form['ingType'], 0)
+        db.createIngredient(newIngredient)
+        return redirect("/adminPanel?ingredient=true")
+
     user = request.args.get('user')
     meal = request.args.get('meal')
+    ingredient = request.args.get('ingredient')
 
     edit = request.args.get('edit')
 
@@ -522,6 +542,11 @@ def admin():
         categories = db.getAllCategories()
         return render_template("editMealPage.html", user=userid, editMeal=editMeal, countries=countries, categories=categories, mealid=meal, role_id=role_id)
 
+    if edit != None and edit.lower() == 'ingredient' and ingredient != None:
+        editIngredient = db.getIngredientbyId(ingredient)
+        return render_template("editIngredientPage.html", user=userid, editIngredient=editIngredient, ingredientid=ingredient, role_id=role_id)
+
+
 
     if user != None and user.lower() == "true" :
         allUsers = db.getAllUsers()
@@ -529,6 +554,10 @@ def admin():
     if meal != None and meal.lower() == "true" :
         allMeals = db.get_meals()
         return render_template("adminPanel.html", user=userid, allMeals=allMeals, mealSelected=True, role_id=role_id)
+    if ingredient != None and ingredient.lower() == "true" :
+        allIngredients = db.getIngredients()
+        return render_template("adminPanel.html", user=userid, allIngredients=allIngredients, ingredientSelected=True, role_id=role_id)
+    
     
     return render_template("adminPanel.html", user=userid, role_id=role_id)
 

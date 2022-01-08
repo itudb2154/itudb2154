@@ -38,13 +38,38 @@
                                         <p>
                                             {{ recipe[1].instruction }}
                                             {%if user==owner%}
-                                            <button type="button" id="instruction" class="btn btn-secondary convert2inputRecipe">
+                                            <button type="button" id="instruction" class="btn btn-secondary convert2inputRecipeTextbox">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil" viewBox="0 0 17 17">
                                                 <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"></path>
                                                 </svg>
                                             </button>
                                             {% endif %}
                                         </p>
+                                    </div>
+                                    <div>
+                                        Portion : 
+                                        <p> {{ recipe[1].portion }}
+                                            {%if user==owner%}
+                                            <button type="button" id="portion" class="btn btn-secondary convert2inputRecipe">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil" viewBox="0 0 17 17">
+                                                <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"></path>
+                                                </svg>
+                                            </button>
+                                            {% endif %}
+                                        </p>
+                                        
+                                        Alternative drink :
+                                        <p>{{ recipe[1].drink_alternate }}
+                                            {%if user==owner%}
+                                            <button type="button" id="drink_alternate" class="btn btn-secondary convert2inputRecipe">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil" viewBox="0 0 17 17">
+                                                <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"></path>
+                                                </svg>
+                                            </button>
+                                            {% endif %}
+                                        </p>
+                                        <p>Category is {{ meal.category_name }}</p>
+                                        <a href="{{recipe[1].video_url}}">Video url</a>
                                     </div>
                                 </div>
                                 <div class="mt-3">
@@ -77,13 +102,19 @@
                                 <div class="card col-sm-3">
                                     <form action="/recipe/{{recipe[0]}}" method="POST">
                                         <div class="card-body">
-                                            <h5 class="card-title">{{ ingredient.name }}</h5>
-                                            <p class="card-text">{{ ingredient.measurement_quantity }}</p>
+                                            <div>
+                                                <h5 class="card-title">{{ ingredient.name }}</h5>
+                                                <p class="card-text">{{ ingredient.measurement_quantity }}</p>
+                                                <small class="text-muted">Protein {{ ingredient.protein }}, Calorie {{ ingredient.calorie }}</small>
+                                                <small class="text-muted">Fat {{ ingredient.fat }}, Type {{ ingredient.ingType }}</small>
+                                            </div>
                                             {%if user==owner%}
+                                            <div class="w-100">
                                                 <input type="text" name="ing_of_meals_id" value="{{key}}" style="display:none">
                                                 <button type="button" class="btn btn-outline-secondary dropdown-ingredient">Edit</button>
                                                 <button type="submit" style="display:none;" name="button" class="btn btn-outline-primary update-btn" id="{{key}}" value="updateIng">Update</button>
                                                 <button type="submit" name="button" class="btn btn-outline-danger" value="deleteIng" id="{{key}}">Delete</button>
+                                            </div>
                                             {% endif %}
                                             </form>
                                         </div>
@@ -159,22 +190,9 @@
             </div>
         </div>
         <script>
-            $(".convert2input").click(function() {
-                var input = $("<input>", { val: $(this).prev().text(),
-                                        type: "text",
-                                        name: $(this).attr("id")});
-                $(this).prev().replaceWith(input);
-                $(this).prev().addClass("d-inline card-text mb-2");
-
-                $(this).remove();
-
-                input.select();
-            });
-
             $(".dropdown-ingredient").click(function() {
-                $(this).prev().prev().prev().replaceWith('<select class="form-select" name="ingredient_id" aria-label="Default select example"><option selected>Select ingredient</option>{%if allingredients%}{%for key, ingredient in allingredients%}<option value="{{key}}">{{ingredient.name}}</option>{%endfor%}{%endif%}</select>');
-                $(this).prev().prev().replaceWith('<label for="quantity" style="margin-right:10px; margin-top:10px;" class="form-label">Quantity: </label><input type="text" name="quantity">');
-                $("#submit-form").removeClass("invisible");
+                $(this).parent().prev().replaceWith('<select class="form-select mt-5" name="ingredient_id" aria-label="Default select example"><option selected>Select ingredient</option>{%if allingredients%}{%for key, ingredient in allingredients%}<option value="{{key}}">{{ingredient.name}}</option>{%endfor%}{%endif%}</select>');
+                $(this).parent().before('<label for="quantity" style="margin-right:10px; margin-top:10px;" class="form-label">Quantity: </label><input class="form-select" type="text" name="quantity">');
 
                 $(this).next().css("display","");
                 $(this).remove();
@@ -223,6 +241,22 @@
                 $(this).remove();
 
                 input.select();
+            });
+
+            $(".convert2inputRecipeTextbox").click(function() {
+                var input = $("<textarea>", { val: $(this).parent().text().trim(),
+                                        type: "text",
+                                        rows: "7",
+                                        cols: "100",
+                                        name: $(this).attr("id")});
+
+                $(input).css("display", "block");
+                $(input).addClass("mt-2")
+
+                $(this).parent().replaceWith(input);
+
+                $("#submit-form").removeClass("invisible");
+               
             });
         </script>
 {% endblock %}

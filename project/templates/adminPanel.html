@@ -11,7 +11,7 @@
 
     <div class="row">
             
-        <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+        <nav id="sidebarMenu" class="col-3 col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
             <div class="position-sticky pt-3">
               <ul class="nav flex-column">
                 
@@ -27,11 +27,17 @@
                       Meals
                     </a>
                   </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="?ingredient=true">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-layers" aria-hidden="true"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+                      Ingredients
+                    </a>
+                  </li>
               </ul>
             </div>
           </nav>
           {%if userSelected%}
-          <div class="table-responsive mt-5">
+          <div class="table-responsive col-9">
                 <table class="table table-striped table-sm">
                 <thead>
                     <tr>
@@ -67,10 +73,10 @@
             </div>
             {%endif%}
             {%if mealSelected%}
-            <div class="table-responsive mt-5">
+            <div class="table-responsive col-9">
                 <div class="row row-cols-1 row-cols-sm-4 d-flex justify-content-center mt-5">
                     <form method="POST" class="signin-form">
-                        <div class="form-group me-2 mt-2">
+                        <div class="form-group me-2">
                         <button type="submit" name="button" value="addMeal" class="form-control btn btn-dark submit px-3">
                             Add meal
                         </button>
@@ -113,6 +119,59 @@
                 </table>
             </div>
             {%endif%}
+
+
+
+            {%if ingredientSelected%}
+            <div class="table-responsive col-9">
+                <div class="row row-cols-1 row-cols-sm-4 d-flex justify-content-center mt-5">
+                    <form method="POST" class="signin-form">
+                        <div class="form-group me-2">
+                        <button type="submit" name="button" value="addIngredient" class="form-control btn btn-dark submit px-3">
+                            Add Ingredient
+                        </button>
+                        </div>
+                    </form>
+                </div>
+                <table class="table table-striped table-sm">
+                <thead>
+                    <tr>
+                    <th scope="col">Id</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Protein</th>
+                    <th scope="col">Calorie</th>
+                    <th scope="col">Fat</th>
+                    <th scope="col">Type</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {%if allIngredients%}
+                    {%for key, ingredient in allIngredients%}
+                    <tr>
+                    <td>{{key}}</td>
+                    <td>{{ingredient.name}}</td>
+                    <td>{{ingredient.protein}}</td>
+                    <td>{{ingredient.calorie}}</td>
+                    <td>{{ingredient.fat}}</td>
+                    <td>{{ingredient.ingType}}</td>
+                    <td>
+                        
+                        <a href="?edit=ingredient&ingredient={{key}}"><button type="submit" class="btn btn-sm btn-outline-secondary ">Edit</button></a>
+                        <form method="POST">
+                            <button type="submit" name="delete-ingredient" value="{{key}}" class="btn btn-sm btn-danger">Delete</button>
+                        </form>
+                    </td>
+                    </tr>
+                    {%endfor%}
+                    {%endif%}
+
+                </tbody>
+                </table>
+            </div>
+            {%endif%}
+
+
+
         </div> 
 </div>
 
