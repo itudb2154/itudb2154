@@ -33,12 +33,12 @@ def menu(menuId):
     if request.method == 'POST':
         if request.form.get('button') == "updateMeal":
             if user==owner:
-                myDict = []
+                myList = []
                 for key, value in request.form.items():
                     if(value != "updateMeal"):
-                        myDict.append((key, value))
+                        myList.append((key, value))
 
-                db.updateMenuContent(myDict)
+                db.updateMenuContent(myList, menuId)
 
                 url = "/menu/" + str(menuId)
                 return redirect(url)

@@ -1,4 +1,3 @@
-
 from project import app
 from functools import wraps
 from flask import render_template, redirect, session, request
@@ -40,6 +39,5 @@ def addMenu():
             url = "/user/" + str(session.get("id")) + "/menus"
             return redirect(url)
 
-        elif request.form['addMenu'] == "addPage":
-            meals = db.get_meals()
-            return render_template('addmenu.html', meals=meals, user=session.get("id"), role_id=role_id)
+    meals = db.get_meals()
+    return render_template('addmenu.html', meals=meals, user=session.get("id"), role_id=role_id)

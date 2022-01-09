@@ -25,13 +25,14 @@ def addMeal(menuId):
     role_id = session.get("role_id")
     user = session.get("id")
     owner = db.getMenuOwner(menuId)
+    if user != owner:
+        return redirect("/")
 
-    allMeals = db.get_meals()
-
-    if request.method == 'POST' and user==owner and request.form['button'] == "add":
+    if request.method == 'POST' and request.form['button'] == "add":
         meals = request.form.getlist('meals')
         db.addUserMenuMeals(meals, menuId)
         url = "/menu/" + str(menuId)
         return redirect(url)
 
-    return render_template('addMeal.html', allMeals=allMeals, user=user, owner=owner, role_id=role_id)
+    allMeals = db.get_meals()
+    return render_template('addMeal.html', allMeals=allMeals, user=user, role_id=role_id)

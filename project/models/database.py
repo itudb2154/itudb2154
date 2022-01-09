@@ -338,11 +338,11 @@ class Database:
             cursor.execute(query, [menu_id])
             connection.commit()
 
-    def updateUserMenu(self, myDict, menuId):
+    def updateUserMenu(self, myList, menuId):
         with psycopg2.connect(self.conn, sslmode='require') as connection:
             cursor = connection.cursor()
             
-            for key, value in myDict:
+            for key, value in myList:
                 if key == 'title':
                     query = 'UPDATE userMenu SET title = %s WHERE id = %s;'
                 elif key == 'description':
@@ -350,10 +350,12 @@ class Database:
                 elif key == 'notes':
                     query = 'UPDATE userMenu SET notes = %s WHERE id = %s;'
 
-                arr = []
-                arr.append(value)
-                arr.append(menuId)
-                cursor.execute(query, arr)
+                cursor.execute(query, (value, menuId))
+
+            dateNow = int(time.time())
+            
+            query = 'UPDATE userMenu SET updated_date = %s WHERE id = %s;'
+            cursor.execute(query, (dateNow, menuId))
 
             connection.commit()
 
@@ -555,12 +557,16 @@ class Database:
                 cursor.execute(query, (menuId, mealId[0]))
                 connection.commit()    
 
-    def updateMenuContent(self, myDict):
+    def updateMenuContent(self, myDict, menuId):
         with psycopg2.connect(self.conn, sslmode='require') as connection:
             cursor = connection.cursor()
             arr = []
             for key, value in myDict:
                 arr.append(value)
+            dateNow = int(time.time())
+
+            query = 'UPDATE userMenu SET updated_date = %s WHERE id = %s;'
+            cursor.execute(query, (dateNow, menuId))
 
             query = 'UPDATE menuContent SET meal_id = %s WHERE id = %s;'
             cursor.execute(query, arr)
