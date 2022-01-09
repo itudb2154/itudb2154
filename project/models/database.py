@@ -77,10 +77,10 @@ class Database:
                 recipes.append((recipe_id, recipe))
             return recipes
 
-    def updateRecipe(self, myDict, recipeId):
+    def updateRecipe(self, myList, recipeId):
         with psycopg2.connect(self.conn, sslmode='require') as connection:
             cursor = connection.cursor()
-            for key, value in myDict:
+            for key, value in myList:
                 if key == 'recipe_name':
                     query = 'UPDATE recipe SET name = %s WHERE id = %s;'
                 elif key == 'meal_id':
@@ -240,23 +240,23 @@ class Database:
             cursor.execute(query, [ing_id])
             connection.commit()
 
-    def updateIngredientOfMeals(self, myDict):
+    def updateIngredientOfMeals(self, myList):
         with psycopg2.connect(self.conn, sslmode='require') as connection:
             cursor = connection.cursor()
             arr = []
-            for key, value in myDict:
+            for key, value in myList:
                 arr.append(value)
             
             query = 'UPDATE ingredients_of_meal SET ingredient_id = %s, measurement_quantity = %s WHERE id = %s;'
             cursor.execute(query, arr)
             connection.commit()
 
-    def addIngredient(self, myDict, recipeId):
+    def addIngredient(self, myList, recipeId):
         with psycopg2.connect(self.conn, sslmode='require') as connection:
             cursor = connection.cursor()
             arr = []
             arr.append(recipeId)
-            for key, value in myDict:
+            for key, value in myList:
                 arr.append(value)
 
             query = 'INSERT INTO ingredients_of_meal (recipe_id, ingredient_id, measurement_quantity) VALUES(%s, %s, %s);'
@@ -382,14 +382,14 @@ class Database:
             user = User(userDb[0], userDb[1], userDb[2], userDb[3], userDb[4], userDb[5], userDb[6], userDb[7])
             return user
 
-    def updateUser(self, myDict, userId):
+    def updateUser(self, myList, userId):
         
         with psycopg2.connect(self.conn, sslmode='require') as connection:
             cursor = connection.cursor()
             new_dict = []
             passwordTemp = 0
 
-            for key, value in myDict:
+            for key, value in myList:
 
                 if key == "pass-current":
                     plaintext = value.encode()
@@ -414,20 +414,22 @@ class Database:
                 else:
                     new_dict.append((key, value))
 
-            arr = []
-            query = 'UPDATE users SET '
+            query = 'UPDATE users SET name = %s WHERE (id = %s);'
             for key, value in new_dict:
-                substring = ' = %s, '
-                substring = key + substring
-                arr.append(value)
 
-                query += substring
-            
-            query = query[:-2]
-            query += ' WHERE (id = %s);'
-            arr.append(userId)
+                if key == "name":
+                    query = 'UPDATE users SET name = %s WHERE (id = %s);'
+                elif key == "surname":
+                    query = 'UPDATE users SET surname = %s WHERE (id = %s);'
+                elif key == "password":
+                    query = 'UPDATE users SET password = %s WHERE (id = %s);'
+                elif key == "age":
+                    query = 'UPDATE users SET age = %s WHERE (id = %s);'
+                elif key == "country":
+                    query = 'UPDATE users SET country = %s WHERE (id = %s);'
 
-            cursor.execute(query, arr)
+                cursor.execute(query, (value, userId))
+
             connection.commit()
             
             return 0
@@ -479,11 +481,11 @@ class Database:
                 comments.append((commentId, comment))
             return comments
 
-    def updateComment(self, myDict):
+    def updateComment(self, myList):
         with psycopg2.connect(self.conn, sslmode='require') as connection:
             cursor = connection.cursor()
             arr = []
-            for key, value in myDict:
+            for key, value in myList:
                 arr.append(value)
      
             query = 'UPDATE comment SET message = %s, language = %s, text_color = %s, updated_date = %s WHERE id = %s;'
@@ -557,19 +559,32 @@ class Database:
                 cursor.execute(query, (menuId, mealId[0]))
                 connection.commit()    
 
-    def updateMenuContent(self, myDict, menuId):
+    def updateMenuContent(self, myList, menuId):
         with psycopg2.connect(self.conn, sslmode='require') as connection:
             cursor = connection.cursor()
-            arr = []
-            for key, value in myDict:
-                arr.append(value)
+            
+            x = -1
+            y = -1
+
+            for key, value in myList:
+                if key == "menu_content_id":
+                    x = value
+
+                elif key == "meal_id":
+                    y = value
+
+
+            if x == -1 or y == -1:
+                return
+            
+            query = 'UPDATE menuContent SET meal_id = %s WHERE id = %s;'
+            cursor.execute(query, (y, x))
+
             dateNow = int(time.time())
 
             query = 'UPDATE userMenu SET updated_date = %s WHERE id = %s;'
             cursor.execute(query, (dateNow, menuId))
 
-            query = 'UPDATE menuContent SET meal_id = %s WHERE id = %s;'
-            cursor.execute(query, arr)
             connection.commit()
     
     def deleteMenuContent(self, contentId):

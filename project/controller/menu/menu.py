@@ -60,12 +60,12 @@ def menu(menuId):
         
         elif request.form.get('button') == "submit-change":
             if user==owner:
-                myDict = []
+                myList = []
                 for key, value in request.form.items():
                     if(value != "submit-change"):
-                        myDict.append((key, value))
+                        myList.append((key, value))
 
-                db.updateUserMenu(myDict, menuId)
+                db.updateUserMenu(myList, menuId)
                 url = "/menu/" + str(menuId)
                 return redirect(url)
 

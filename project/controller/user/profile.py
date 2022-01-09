@@ -27,13 +27,13 @@ def user(userId):
     countries = db.getAllCountries()
 
     if request.method == 'POST' and request.form.get('button') == "change-user" and isOwner:
-        myDict = []
+        myList = []
         for key, value in request.form.items():
             if(value != "change-user"):
-                myDict.append((key, value))
+                myList.append((key, value))
                 
         
-        error = db.updateUser(myDict, userId) # Can be used as error code******
+        error = db.updateUser(myList, userId) # Can be used as error code******
         if(error == 0):
             owner = db.getUser(userId)
 

@@ -1,6 +1,5 @@
 import psycopg2
 import requests
-import random
 
 TABLE_CREATE_QUERY = [
         '''CREATE TABLE IF NOT EXISTS country (
@@ -195,7 +194,7 @@ for c in "abc":
         new_instruction = data["meals"][j]["strInstructions"].replace("'","''")
 
         #insert its category (assuming all recipes are unique)
-        cursor.execute('''INSERT INTO recipe (name, instruction, user_id, meal_id, drink_alternate, video_url, portion) VALUES ('System''s %s recipe', '%s', (select u.id from users u where u.name='admin'), (select id from meal where name='%s'), '%s', '%s', '%s');''' % (z, new_instruction, data["meals"][j]["strMeal"], data["meals"][j]["strDrinkAlternate"], data["meals"][j]["strYoutube"], random.randint(2,9)))
+        cursor.execute('''INSERT INTO recipe (name, instruction, user_id, meal_id, drink_alternate, video_url, portion) VALUES ('System''s %s recipe', '%s', (select u.id from users u where u.name='admin'), (select id from meal where name='%s'), '%s', '%s', '%s');''' % (z, new_instruction, data["meals"][j]["strMeal"], data["meals"][j]["strDrinkAlternate"], data["meals"][j]["strYoutube"], 0))
         z = z + 1
         
 
@@ -207,7 +206,7 @@ for c in "abc":
             #if the api sends a meaningfull ingredient
             if data["meals"][j][ingredient] != '' and data["meals"][j][ingredient] is not None:
                 #add it if it does not already exist
-                cursor.execute('''INSERT INTO ingredient (name, protein, calorie, fat) VALUES ('%s', '%s', '%s', '%s') ON CONFLICT DO NOTHING;'''% (data["meals"][j][ingredient], random.randint(32,125), random.randint(25,130), random.randint(45,165)))
+                cursor.execute('''INSERT INTO ingredient (name, protein, calorie, fat) VALUES ('%s', '%s', '%s', '%s') ON CONFLICT DO NOTHING;'''% (data["meals"][j][ingredient], 0, 0, 0))
                 
 
         #there are 20 quantitites at max
