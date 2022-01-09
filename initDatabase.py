@@ -28,6 +28,8 @@ TABLE_CREATE_QUERY = [
             mail VARCHAR(80),
             password VARCHAR(80),
             age INTEGER,
+            eduHistory INTEGER,
+            gender INTEGER,
             country_id INTEGER NOT NULL,
             role_id INTEGER NOT NULL
             )''',

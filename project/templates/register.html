@@ -42,10 +42,23 @@
 							<label class="label" for="age">Age</label>
 							<input type="text" name="age" class="form-control-2" placeholder="Age" required="">
 				   		</div>
+						<div class="form-group-2 mb-3">
+							<label class="label">Gender</label><br>
+							<input type="radio" id="male" name="gender" value="Male">
+							<label for="male">Male</label>
+							<input type="radio" id="female" name="gender" value="Female">
+							<label for="female">Female</label><br>
+				   		</div>
+						   <div class="form-group-2 mb-3">
+							<label class="label">Education History</label><br>
+							<input type="checkbox" id="education_history" name="eduHistory" value="education_history">
+							<label style="font-size:14px;" for="education_history">Have you taken any education or course related with food industry?</label><br>
+				   		</div>
 					   <div class="form-group-2 mb-3">
 							<label class="label" for="country">Country</label>
-							<select class="form-select" name="country" aria-label="Default select example"><option selected>Select a country from the dropdown</option>{%if countries%}{%for key, country in countries%}<option value="{{key}}">{{country.name}}</option>{%endfor%}{%endif%}</select>
+							<select class="form-select" name="country" aria-label="Default select example" required=""><option selected>Select a country from the dropdown</option>{%if countries%}{%for key, country in countries%}<option value="{{key}}">{{country.name}}</option>{%endfor%}{%endif%}</select>
 				   		</div>
+						   
 						
 
 					</div>
@@ -59,7 +72,7 @@
 								<label class="alert alert-danger" style="padding:7px; width:100%; text-align:center; margin-top:15px;">Email is already registred on system!</label> 
 							</div>
 						{%endif%}
-		            <div class="form-group-2">
+		            <div class="form-group-2 mt-5">
 		            	<button type="submit" class="form-control-2 btn btn-dark submit px-3">Sign Up</button>
 		            </div>
 		          </form>
