@@ -22,8 +22,8 @@
                       <div class="btn-group">
                         <a href="/recipe/{{key}}"><button type="button" class="btn btn-sm btn-outline-secondary">View</button></a>
                         <form action="/recipe/{{key}}" method="POST">
-                          {%if owner == user%}
-                          <button type="submit" name="button" value="deleteRecipe" class="btn btn-sm btn-outline-danger">Delete</button>
+                          {%if recipe.user_id == user%}
+                          <button type="submit" name="button" value="deleteRecipe" class="btn btn-sm btn-outline-danger ms-1">Delete</button>
                           {%endif%}
                         </form>
                       </div>

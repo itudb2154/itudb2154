@@ -27,9 +27,12 @@ def addIng(recipeId):
     user = session.get("id")
     recipe = db.getRecipe(recipeId)
     owner = recipe[1].user_id
+    if user != owner:
+        return redirect("/")
+
     allingredients = db.getIngredients()
 
-    if request.method == 'POST' and user==owner and request.form['button'] == "add":
+    if request.method == 'POST' and request.form['button'] == "add":
         ingredients = request.form.getlist('ingredient')
         measures = request.form.getlist('measure')
         db.addRecipeIngredient(ingredients, measures, recipeId)
