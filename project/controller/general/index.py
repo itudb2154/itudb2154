@@ -6,18 +6,8 @@ from project.models.recipe import *
 
 db = Database(app.config['DATABASE_URL'])
 
-app.config['SECRET_KEY'] = 'thisisthesecret'
-
 @app.route('/', methods = ['GET', 'POST'])
 def index():
-    query = "select * from users"
-    with psycopg2.connect(db.conn, sslmode='require') as connection:
-        cursor = connection.cursor()
-        cursor.execute(query)
-        result = cursor.fetchall()
-        print(result)
-        connection.commit()
-
 
     role_id = session.get("role_id")
     if request.method == 'POST' and request.form['button'] == "search":

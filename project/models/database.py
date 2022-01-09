@@ -373,13 +373,13 @@ class Database:
     def getUser(self, userId):
         with psycopg2.connect(self.conn, sslmode='require') as connection:
             cursor = connection.cursor()
-            query = 'select users.id, users.name, users.surname, users.mail, users.password, users.age, country.name, users.role_id from users JOIN country ON (users.country_id = country.id) where (users.id = %s);'
+            query = 'select users.id, users.name, users.surname, users.mail, users.password, users.age, users.eduHistory, users.gender, country.name, users.role_id from users JOIN country ON (users.country_id = country.id) where (users.id = %s);'
             
             cursor.execute(query, [userId])
             connection.commit()
             userDb = cursor.fetchone()
             
-            user = User(userDb[0], userDb[1], userDb[2], userDb[3], userDb[4], userDb[5], userDb[6], userDb[7])
+            user = User(userDb[0], userDb[1], userDb[2], userDb[3], userDb[4], userDb[5], userDb[6], userDb[7], userDb[8], userDb[9])
             return user
 
     def updateUser(self, myList, userId):
@@ -426,6 +426,10 @@ class Database:
                     query = 'UPDATE users SET age = %s WHERE (id = %s);'
                 elif key == "country":
                     query = 'UPDATE users SET country = %s WHERE (id = %s);'
+                elif key == "eduHistory":
+                    query = 'UPDATE users SET eduHistory = %s WHERE (id = %s);'
+                elif key == "gender":
+                    query = 'UPDATE users SET gender = %s WHERE (id = %s);'
 
                 cursor.execute(query, (value, userId))
 
@@ -437,13 +441,13 @@ class Database:
         users = []
         with psycopg2.connect(self.conn, sslmode='require') as connection:
             cursor = connection.cursor()
-            query = 'select id, name, surname, mail, password, age, country_id, role_id FROM users ORDER BY id ASC;'
+            query = 'select id, name, surname, mail, password, age, eduHistory, gender, country_id, role_id FROM users ORDER BY id ASC;'
             cursor.execute(query)
             connection.commit()
             usersDb = cursor.fetchall()
 
-            for userId, name, surname, mail, password, age, countryId, role_id in usersDb:
-                user = User(userId, name, surname, mail, password, age, countryId, role_id) 
+            for userId, name, surname, mail, password, age, eduHistory, gender, countryId, role_id in usersDb:
+                user = User(userId, name, surname, mail, password, age, eduHistory, gender, countryId, role_id) 
                 users.append((userId, user))
             return users
 

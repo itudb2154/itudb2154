@@ -86,6 +86,20 @@
                                     {%if isOwner%}<button type="button" class="btn btn-outline-secondary dropdown-countries" id="country">Change country</button>{% endif %}
                                     </div>
                                 </div>
+                                <div class="card text-center">
+                                    <div class="card-body">
+                                    <h5 class="card-title">Gender</h5>
+                                    <p class="card-text">{%if owner.gender == 1 %}Male{% else %}Female{%endif%}</p>
+                                    {%if isOwner%}<button type="button" class="btn btn-outline-secondary convert2inputG" id="gender">Change Gender</button>{% endif %}
+                                    </div>
+                                </div>
+                                <div class="card text-center">
+                                    <div class="card-body">
+                                    <h5 class="card-title">Education History</h5>
+                                    <p class="card-text">{%if owner.eduHistory == 1 %}Yes{% else %}No{% endif %}</p>
+                                    {%if isOwner%}<button type="button" class="btn btn-outline-secondary convert2inputH" id="eduHistory">Change Edu. History</button>{% endif %}
+                                    </div>
+                                </div>
                                 <div class="row row-cols-1 row-cols-sm-4 d-flex justify-content-start">
                                     <div class="form-group mt-2">
                                         {%if isOwner%}<button class="btn btn-primary invisible" id="submit-form" name="button" value="change-user">Submit changes</button>{% endif %}
@@ -155,6 +169,25 @@
             $("#submit-form").removeClass("invisible");
         });
 
+        $(".convert2inputG").click(function() {
+            var input = $('<input type="radio" id="male" name="gender" value="Male" {%if owner.gender == 1 %}checked="checked"{% endif %} required> <label for="male" style="margin-right:4px;">Male</label><input {%if owner.gender == 0 %}checked="checked"{% endif %} type="radio" id="female" name="gender" value="Female"><label style="margin-left:4px;" for="female">Female</label>');
+            $(this).prev().replaceWith(input);
+            $(this).remove();
+
+            $("#submit-form").removeClass("invisible");
+                
+            input.select();
+        });
+
+        $(".convert2inputH").click(function() {
+            var input = $('<input type="checkbox" id="education_history" name="eduHistory" value="education_history" {%if owner.eduHistory == 1 %}checked="checked"{% endif %} ><label style="font-size:14px;" for="education_history">Have you taken any education or course related with food industry?</label>');
+            $(this).prev().replaceWith(input);
+            $(this).remove();
+
+            $("#submit-form").removeClass("invisible");
+                
+            input.select();
+        });
         //for the dropdown countries menu
         $(".dropdown-countries").click(function() {
             $(this).prev().replaceWith('<select class="form-select" name="country_id" aria-label="Default select example"><option selected>Select a country from the dropdown</option>{%if countries%}{%for key, country in countries%}<option value="{{key}}">{{country.name}}</option>{%endfor%}{%endif%}</select>');

@@ -17,17 +17,23 @@ def register():
         return redirect("/")
 
     if request.method == 'POST':
-        import hashlib
-        plaintext = request.form['password'].encode()
-        d = hashlib.sha256(plaintext)
-        hash = d.hexdigest()
         query = '''SELECT id FROM users where mail=%s;'''
         cursor.execute(query, [request.form['email']])
         response = cursor.fetchone()
+        
         if response != None:
             return render_template('register.html', error=True)
-        query = '''INSERT INTO users (name, surname, password, mail, country_id, age, role_id) VALUES (%s, %s, %s, %s, %s, %s, 0) ON CONFLICT DO NOTHING;'''
-        cursor.execute(query,(request.form['name'], request.form['surname'], hash, request.form['email'], request.form['country'], request.form['age']))
+        
+        import hashlib
+        plaintext = request.form['password'].encode()
+        d = hashlib.sha256(plaintext)
+        hash_ = d.hexdigest()
+
+        edu = 1 if request.form.get("eduHistory") != None else 0
+        gender = 1 if request.form['gender'] == "Male" else 0
+
+        query = '''INSERT INTO users (name, surname, password, mail, country_id, age, eduHistory, gender, role_id) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, 0) ON CONFLICT DO NOTHING;'''
+        cursor.execute(query,(request.form['name'], request.form['surname'], hash_, request.form['email'], request.form['country'], request.form['age'], edu, gender))
         
         connection.commit()
 

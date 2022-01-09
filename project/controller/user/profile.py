@@ -29,10 +29,20 @@ def user(userId):
     if request.method == 'POST' and request.form.get('button') == "change-user" and isOwner:
         myList = []
         for key, value in request.form.items():
-            if(value != "change-user"):
+            if key == "gender":
+                gender = 1 if request.form['gender'] == "Male" else 0
+                myList.append(("gender", gender))
+            elif key == "eduHistory":
+                myList.append(("eduHistory", 1))
+            elif value != "change-user":
                 myList.append((key, value))
-                
+
+        edu = 1 if request.form.get("eduHistory") != None else 0
+        myList.append(("eduHistory", edu))
+
         error = db.updateUser(myList, userId) # Can be used as error code******
+        if error == 0:
+            owner = db.getUser(userId)
 
         return render_template("user.html", user=user, owner=owner, isOwner=isOwner, countries=countries, role_id=role_id, error=error)
         

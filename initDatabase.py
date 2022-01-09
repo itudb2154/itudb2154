@@ -1,5 +1,6 @@
 import psycopg2
 import requests
+import random
 
 TABLE_CREATE_QUERY = [
         '''CREATE TABLE IF NOT EXISTS country (
@@ -170,7 +171,7 @@ cursor.execute('''INSERT INTO country (name) VALUES ('Turkey');''')
 connection.commit()
 
 #inserting admin to user table once
-cursor.execute('''INSERT INTO users (name, country_id, role_id, password) VALUES ('admin', (select id from country where name='Turkey'), 1, 'a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3');''')
+cursor.execute('''INSERT INTO users (name, mail, country_id, role_id, password) VALUES ('admin', 'admin@recipe.com', (select id from country where name='Turkey'), 1, 'a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3');''')
 connection.commit()
 
 z = 0
@@ -196,7 +197,7 @@ for c in "abc":
         new_instruction = data["meals"][j]["strInstructions"].replace("'","''")
 
         #insert its category (assuming all recipes are unique)
-        cursor.execute('''INSERT INTO recipe (name, instruction, user_id, meal_id, drink_alternate, video_url, portion) VALUES ('System''s %s recipe', '%s', (select u.id from users u where u.name='admin'), (select id from meal where name='%s'), '%s', '%s', '%s');''' % (z, new_instruction, data["meals"][j]["strMeal"], data["meals"][j]["strDrinkAlternate"], data["meals"][j]["strYoutube"], 0))
+        cursor.execute('''INSERT INTO recipe (name, instruction, user_id, meal_id, drink_alternate, video_url, portion) VALUES ('System''s %s recipe', '%s', (select u.id from users u where u.name='admin'), (select id from meal where name='%s'), '%s', '%s', '%s');''' % (z, new_instruction, data["meals"][j]["strMeal"], data["meals"][j]["strDrinkAlternate"], data["meals"][j]["strYoutube"], random.randint(2,9)))
         z = z + 1
         
 
@@ -208,7 +209,7 @@ for c in "abc":
             #if the api sends a meaningfull ingredient
             if data["meals"][j][ingredient] != '' and data["meals"][j][ingredient] is not None:
                 #add it if it does not already exist
-                cursor.execute('''INSERT INTO ingredient (name, protein, calorie, fat) VALUES ('%s', '%s', '%s', '%s') ON CONFLICT DO NOTHING;'''% (data["meals"][j][ingredient], 0, 0, 0))
+                cursor.execute('''INSERT INTO ingredient (name, protein, calorie, fat) VALUES ('%s', '%s', '%s', '%s') ON CONFLICT DO NOTHING;'''% (data["meals"][j][ingredient], random.randint(25,90), random.randint(40,110), random.randint(15,140)))
                 
 
         #there are 20 quantitites at max
