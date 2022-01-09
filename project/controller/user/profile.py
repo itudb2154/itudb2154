@@ -32,10 +32,7 @@ def user(userId):
             if(value != "change-user"):
                 myList.append((key, value))
                 
-        
         error = db.updateUser(myList, userId) # Can be used as error code******
-        if(error == 0):
-            owner = db.getUser(userId)
 
         return render_template("user.html", user=user, owner=owner, isOwner=isOwner, countries=countries, role_id=role_id, error=error)
         
@@ -53,8 +50,6 @@ def recipes(ownerId):
 
     owner = ownerId
     user = session.get("id")
-    #if session.get("id") == ownerId:
-        #owner = True    #if i am the owner, i can change this page
 
     return render_template('recipes.html', recipes=recipes, user=user, owner=owner, role_id=role_id)
 

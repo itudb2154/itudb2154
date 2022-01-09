@@ -383,7 +383,6 @@ class Database:
             return user
 
     def updateUser(self, myList, userId):
-        
         with psycopg2.connect(self.conn, sslmode='require') as connection:
             cursor = connection.cursor()
             new_dict = []
@@ -414,7 +413,7 @@ class Database:
                 else:
                     new_dict.append((key, value))
 
-            query = 'UPDATE users SET name = %s WHERE (id = %s);'
+            
             for key, value in new_dict:
 
                 if key == "name":
