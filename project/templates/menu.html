@@ -93,6 +93,7 @@
                         {%endif%}
                         </div>
                     </div>
+                    {%if user==owner%}
                     <div class="row row-cols-1 row-cols-sm-4 d-flex justify-content-center">
                         <form method="POST" class="signin-form" action="/menu/{{menu[0]}}/addMeal">
                             <div class="form-group me-2 mt-2">
@@ -102,7 +103,7 @@
                             </div>
                         </form>
                     </div>
-                    
+                    {%endif%}
                     
                 </div>            
             </div>
