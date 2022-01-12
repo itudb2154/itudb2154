@@ -190,8 +190,8 @@
         </div>
         <script>
             $(".dropdown-ingredient").click(function() {
-                $(this).parent().prev().replaceWith('<select class="form-select mt-5" name="ingredient_id" aria-label="Default select example"><option selected>Select ingredient</option>{%if allingredients%}{%for key, ingredient in allingredients%}<option value="{{key}}">{{ingredient.name}}</option>{%endfor%}{%endif%}</select>');
-                $(this).parent().before('<label for="quantity" style="margin-right:10px; margin-top:10px;" class="form-label">Quantity: </label><input class="form-select" type="text" name="quantity">');
+                $(this).parent().prev().replaceWith('<select class="form-select" name="ingredient_id" aria-label="Default select example"><option selected>Select ingredient</option>{%if allingredients%}{%for key, ingredient in allingredients%}<option value="{{key}}">{{ingredient.name}}</option>{%endfor%}{%endif%}</select>');
+                $(this).parent().before('<label for="quantity" style="margin-right:10px; margin-top:6px; margin-bottom:6px !important;" class="form-label">Quantity: </label><input class="form-select" style="margin-bottom:5px;" type="text" name="quantity">');
 
                 $(this).next().css("display","");
                 $(this).remove();

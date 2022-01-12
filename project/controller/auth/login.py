@@ -8,7 +8,7 @@ import psycopg2
 from functools import wraps
 db = Database(app.config['DATABASE_URL'])
 
-connection = psycopg2.connect(app.config['DATABASE_URL'],sslmode = 'require')
+connection = psycopg2.connect(app.config['DATABASE_URL'])
 cursor = connection.cursor()
 
 def login_required(func):
